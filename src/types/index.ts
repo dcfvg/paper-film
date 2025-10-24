@@ -28,6 +28,8 @@ export interface PrintOptions {
   columns: number;
   showTimecodes: boolean;
   subtitleFontSize: number; // en pt
-  pageFormat: 'A4' | 'letter';
+  pageFormat: 'A3' | 'A4' | 'A5' | 'letter' | 'legal' | 'tabloid';
   captureCount?: number; // nombre de captures souhaité
+  timeOffset?: number; // décalage en millisecondes
+  smoothPhrases?: boolean; // fluidifier les phrases
 }

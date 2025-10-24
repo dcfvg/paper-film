@@ -88,6 +88,52 @@
   color: #888;
 }
 
+.control-hint {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #888;
+  font-style: italic;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 0.75rem;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.checkbox-label:hover {
+  background: #f9fafb;
+}
+
+.checkbox-label span {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.checkbox-label small {
+  font-size: 0.85rem;
+  color: #888;
+  font-weight: normal;
+}
+
+.control-checkbox {
+  width: 1.2rem;
+  height: 1.2rem;
+  cursor: pointer;
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+.control-checkbox:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .info-box {
   background: #f3f4f6;
   border-radius: 10px;

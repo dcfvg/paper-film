@@ -38,26 +38,32 @@ export default function ContactSheet({
         ${printOptions.showTimecodes ? 'show-timecodes' : 'hide-timecodes'}`}
       style={gridStyle}
     >
-      <div className="contact-sheet-controls no-print">
-        <button onClick={onBack} className="btn btn-secondary">
-          ← Retour
-        </button>
-        <h2>Planche de contact - {videoFileName}</h2>
-        <button onClick={handlePrint} className="btn btn-primary">
-          🖨️ Imprimer
-        </button>
-      </div>
+      <div className="contact-sheet-header no-print">
+        <div className="header-controls">
+          <button onClick={onBack} className="btn btn-secondary">
+            ← Retour
+          </button>
+          <h2>Planche de contact - {videoFileName}</h2>
+          <button onClick={handlePrint} className="btn btn-primary">
+            🖨️ Imprimer
+          </button>
+        </div>
 
-      <div className="no-print">
-        <PrintOptionsComponent 
-          options={printOptions} 
-          onChange={onPrintOptionsChange} 
-        />
-        
-        <LayoutPreview 
-          printOptions={printOptions}
-          totalFrames={frames.length}
-        />
+        <div className="header-layout">
+          <div className="header-options">
+            <PrintOptionsComponent 
+              options={printOptions} 
+              onChange={onPrintOptionsChange} 
+            />
+          </div>
+          
+          <div className="header-preview">
+            <LayoutPreview 
+              printOptions={printOptions}
+              totalFrames={frames.length}
+            />
+          </div>
+        </div>
       </div>
 
       <div className="contact-sheet-grid" style={gridStyle}>

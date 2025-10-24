@@ -22,6 +22,8 @@ function App() {
     subtitleFontSize: 8,
     pageFormat: 'A4',
     captureCount: 30,
+    timeOffset: 0,
+    smoothPhrases: true,
   });
   
   const { frames, isProcessing, progress, captureFrames, reset } = useFrameCapture();

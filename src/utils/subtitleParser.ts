@@ -124,20 +124,101 @@ function endsWithFinalPunctuation(text: string): boolean {
 }
 
 /**
+ * Vérifie si un texte contient une citation ouverte non fermée
+ */
+function hasOpenQuote(text: string): boolean {
+  const openQuotes = (text.match(/[«"']/g) || []).length;
+  const closeQuotes = (text.match(/[»"']/g) || []).length;
+  return openQuotes > closeQuotes;
+}
+
+/**
+ * Vérifie si un texte est une question
+ */
+function isQuestion(text: string): boolean {
+  return text.trim().endsWith('?');
+}
+
+/**
+ * Vérifie si un texte est court (moins de 30 caractères)
+ */
+function isShortPhrase(text: string): boolean {
+  return text.trim().length < 30;
+}
+
+/**
+ * Vérifie si on peut couper à cet endroit
+ */
+function canCutHere(text: string, nextText: string | undefined): boolean {
+  // Ne pas couper si on a une citation ouverte
+  if (hasOpenQuote(text)) {
+    return false;
+  }
+  
+  // Ne pas couper si c'est une question courte
+  if (isQuestion(text) && isShortPhrase(text)) {
+    return false;
+  }
+  
+  // Ne pas couper si la phrase suivante est très courte (continuation probable)
+  if (nextText && isShortPhrase(nextText)) {
+    return false;
+  }
+  
+  // Sinon, on peut couper si c'est une fin de phrase
+  return endsWithFinalPunctuation(text);
+}
+
+/**
  * Sélectionne un nombre donné de sous-titres espacés uniformément
  * Si le nombre demandé est inférieur au nombre total, fusionne les textes intelligemment
  */
-export function selectSubtitles(entries: SubtitleEntry[], count: number): SubtitleEntry[] {
+export function selectSubtitles(
+  entries: SubtitleEntry[], 
+  count: number, 
+  smoothPhrases: boolean = true,
+  timeOffset: number = 0
+): SubtitleEntry[] {
   if (entries.length === 0) return [];
-  if (count >= entries.length) return entries;
+  
+  // Appliquer le décalage temporel
+  const adjustedEntries = timeOffset !== 0 
+    ? entries.map(entry => ({
+        ...entry,
+        startTime: entry.startTime + timeOffset / 1000,
+        endTime: entry.endTime + timeOffset / 1000
+      }))
+    : entries;
+  
+  // Si on demande autant ou plus de captures que de sous-titres, retourner tous
+  if (count >= adjustedEntries.length) {
+    return adjustedEntries;
+  }
+  
+  // Si smoothPhrases est désactivé, faire une sélection simple
+  if (!smoothPhrases) {
+    const selected: SubtitleEntry[] = [];
+    const step = adjustedEntries.length / count;
+    
+    for (let i = 0; i < count; i++) {
+      const index = Math.floor(i * step);
+      selected.push({
+        ...adjustedEntries[index],
+        index: i + 1
+      });
+    }
+    
+    return selected;
+  }
   
   const selected: SubtitleEntry[] = [];
-  const subtitlesPerCapture = Math.ceil(entries.length / count);
+  const subtitlesPerCapture = Math.ceil(adjustedEntries.length / count);
+  let previousWasCut = false;
   
   for (let i = 0; i < count; i++) {
     const startIdx = i * subtitlesPerCapture;
-    const endIdx = Math.min(startIdx + subtitlesPerCapture, entries.length);
-    const group = entries.slice(startIdx, endIdx);
+    const endIdx = Math.min(startIdx + subtitlesPerCapture, adjustedEntries.length);
+    const group = adjustedEntries.slice(startIdx, endIdx);
     
     if (group.length === 0) continue;
     
@@ -147,8 +228,14 @@ export function selectSubtitles(entries: SubtitleEntry[], count: number): Subtit
     
     for (let j = 0; j < group.length; j++) {
       const sub = group[j];
+      const nextSub = group[j + 1];
       const isLast = j === group.length - 1;
-      const trimmedText = sub.text.trim();
+      let trimmedText = sub.text.trim();
+      
+      // Ajouter … au début si la phrase précédente était coupée
+      if (j === 0 && previousWasCut) {
+        trimmedText = '…' + trimmedText;
+      }
       
       if (currentText) {
         currentText += ' ' + trimmedText;
@@ -156,17 +243,26 @@ export function selectSubtitles(entries: SubtitleEntry[], count: number): Subtit
         currentText = trimmedText;
       }
       
-      // Si le texte se termine par une ponctuation finale, on peut couper ici
-      if (endsWithFinalPunctuation(currentText)) {
+      // Vérifier si on peut couper ici
+      const nextText = nextSub?.text.trim();
+      if (canCutHere(currentText, nextText)) {
         textParts.push(currentText);
         currentText = '';
+        previousWasCut = false;
       } else if (isLast) {
         // Dernier sous-titre du groupe
         if (i < count - 1) {
-          // Pas le dernier groupe -> ajouter ...
-          textParts.push(currentText + '…');
+          // Pas le dernier groupe -> ajouter ... si pas de ponctuation finale
+          if (!endsWithFinalPunctuation(currentText)) {
+            textParts.push(currentText + '…');
+            previousWasCut = true;
+          } else {
+            textParts.push(currentText);
+            previousWasCut = false;
+          }
         } else {
           textParts.push(currentText);
+          previousWasCut = false;
         }
         currentText = '';
       }
@@ -175,9 +271,16 @@ export function selectSubtitles(entries: SubtitleEntry[], count: number): Subtit
     // S'il reste du texte non ajouté
     if (currentText) {
       if (i < count - 1) {
-        textParts.push(currentText + '…');
+        if (!endsWithFinalPunctuation(currentText)) {
+          textParts.push(currentText + '…');
+          previousWasCut = true;
+        } else {
+          textParts.push(currentText);
+          previousWasCut = false;
+        }
       } else {
         textParts.push(currentText);
+        previousWasCut = false;
       }
     }
     

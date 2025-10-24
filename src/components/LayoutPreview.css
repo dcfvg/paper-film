@@ -55,6 +55,16 @@
   position: relative;
 }
 
+.preview-page.portrait.A3 {
+  width: 180px;
+  height: 255px;
+}
+
+.preview-page.landscape.A3 {
+  width: 255px;
+  height: 180px;
+}
+
 .preview-page.portrait.A4 {
   width: 150px;
   height: 212px;
@@ -65,6 +75,16 @@
   height: 150px;
 }
 
+.preview-page.portrait.A5 {
+  width: 106px;
+  height: 150px;
+}
+
+.preview-page.landscape.A5 {
+  width: 150px;
+  height: 106px;
+}
+
 .preview-page.portrait.letter {
   width: 150px;
   height: 195px;
@@ -73,6 +93,26 @@
 .preview-page.landscape.letter {
   width: 195px;
   height: 150px;
+}
+
+.preview-page.portrait.legal {
+  width: 150px;
+  height: 247px;
+}
+
+.preview-page.landscape.legal {
+  width: 247px;
+  height: 150px;
+}
+
+.preview-page.portrait.tabloid {
+  width: 195px;
+  height: 301px;
+}
+
+.preview-page.landscape.tabloid {
+  width: 301px;
+  height: 195px;
 }
 
 .preview-page-label {

@@ -66,7 +66,7 @@ export default function PrintOptionsComponent({ options, onChange }: PrintOption
               id="subtitleFontSize"
               type="range"
               min="6"
-              max="12"
+              max="24"
               value={options.subtitleFontSize}
               onChange={(e) => handleChange('subtitleFontSize', Number(e.target.value))}
               className="option-slider"
@@ -82,11 +82,15 @@ export default function PrintOptionsComponent({ options, onChange }: PrintOption
           <select
             id="pageFormat"
             value={options.pageFormat}
-            onChange={(e) => handleChange('pageFormat', e.target.value as 'A4' | 'letter')}
+            onChange={(e) => handleChange('pageFormat', e.target.value as PrintOptions['pageFormat'])}
             className="option-select"
           >
+            <option value="A3">A3 (29.7 × 42 cm)</option>
             <option value="A4">A4 (21 × 29.7 cm)</option>
+            <option value="A5">A5 (14.8 × 21 cm)</option>
             <option value="letter">Letter (8.5 × 11 in)</option>
+            <option value="legal">Legal (8.5 × 14 in)</option>
+            <option value="tabloid">Tabloid (11 × 17 in)</option>
           </select>
         </div>
 
