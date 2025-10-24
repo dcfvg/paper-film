@@ -95,21 +95,21 @@ export function ConfigPanel({
 
         <div className="config-control">
           <label htmlFor="time-offset">
-            Décalage temporel: <strong>{timeOffset > 0 ? '+' : ''}{timeOffset}s</strong>
+            Décalage sous-titres: <strong>{timeOffset > 0 ? '+' : ''}{timeOffset}s</strong>
           </label>
           <input
             id="time-offset"
             type="range"
-            min="-5"
-            max="5"
-            step="0.1"
+            min="-30"
+            max="30"
+            step="0.5"
             value={timeOffset}
             onChange={(e) => onTimeOffsetChange(parseFloat(e.target.value))}
             className="config-slider"
           />
           <div className="slider-labels">
-            <span>-5s</span>
-            <span>+5s</span>
+            <span>-30s (en retard)</span>
+            <span>+30s (en avance)</span>
           </div>
         </div>
 
@@ -119,15 +119,15 @@ export function ConfigPanel({
               type="checkbox"
               checked={smoothPhrases}
               onChange={(e) => onSmoothPhrasesChange(e.target.checked)}
-              disabled={captureCount === subtitles.length}
             />
-            <span>Phrases fluides (évite les coupures)</span>
+            <span>Phrases fluides (répartition harmonieuse)</span>
           </label>
-          {captureCount === subtitles.length && (
-            <p className="help-text">
-              Désactivé automatiquement car toutes les entrées sont sélectionnées
-            </p>
-          )}
+          <p className="help-text">
+            {captureCount === subtitles.length 
+              ? "Distribue les sous-titres de façon harmonieuse entre les captures"
+              : "Évite les coupures de guillemets, questions et phrases courtes"
+            }
+          </p>
         </div>
       </div>
 

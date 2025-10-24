@@ -1,6 +1,8 @@
 .app {
   min-height: 100vh;
+  height: 100vh;
   width: 100%;
+  overflow: hidden;
 }
 
 * {
@@ -53,43 +55,59 @@ body {
   .preview-panel {
     overflow: visible !important;
     background: white !important;
+    height: auto !important;
   }
 
   .preview-pages {
     padding: 0 !important;
+    display: block !important;
+    grid-template-columns: none !important;
+    gap: 0 !important;
   }
 
   .preview-page {
     transform: none !important;
     box-shadow: none !important;
     page-break-after: always;
+    page-break-before: auto;
+    page-break-inside: avoid;
     margin: 0 !important;
     padding: 1cm !important;
     width: 100% !important;
-    height: 100% !important;
-    aspect-ratio: inherit !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
     box-sizing: border-box !important;
+    display: block !important;
   }
 
   .preview-page:last-child {
     page-break-after: auto;
   }
 
+  .preview-page:first-child {
+    page-break-before: avoid;
+  }
+
   .contact-sheet-grid {
     gap: 0.5rem !important;
-    height: 100% !important;
+    height: auto !important;
+    display: grid !important;
+    page-break-inside: auto !important;
   }
 
   .capture-item {
-    page-break-inside: avoid;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .capture-image-wrapper {
+    page-break-inside: avoid !important;
   }
 
   /* Définir les dimensions réelles pour chaque format */
   @page {
-    margin: 0;
-  }
-
-  @page :first {
-    margin: 0;
+    margin: 1cm;
+    size: auto;
   }
 }

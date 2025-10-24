@@ -190,9 +190,15 @@ export function selectSubtitles(
       }))
     : entries;
   
-  // Si on demande autant ou plus de captures que de sous-titres, retourner tous
+  // Si on demande autant ou plus de captures que de sous-titres
   if (count >= adjustedEntries.length) {
-    return adjustedEntries;
+    // Si smoothPhrases activé, utiliser la logique intelligente pour répartir harmonieusement
+    if (smoothPhrases && count === adjustedEntries.length) {
+      // On continue vers la logique smoothPhrases ci-dessous
+    } else {
+      // Retourner tous les sous-titres tels quels
+      return adjustedEntries;
+    }
   }
   
   // Mode simple (sans smoothPhrases) : sélection uniforme MAIS fusion des sous-titres

@@ -35,12 +35,12 @@ function App() {
     if (state !== 'result' || !videoFile || subtitles.length === 0) return;
 
     const timer = setTimeout(() => {
-      const selected = selectSubtitles(subtitles, captureCount, smoothPhrases, 0); // timeOffset n'affecte pas la capture
+      const selected = selectSubtitles(subtitles, captureCount, false, 0); // smoothPhrases n'affecte que l'affichage, pas la capture
       captureFrames(videoFile, selected);
     }, 500); // 500ms debounce
 
     return () => clearTimeout(timer);
-  }, [captureCount, smoothPhrases, videoFile, subtitles, state]); // Retiré timeOffset
+  }, [captureCount, videoFile, subtitles, state]); // smoothPhrases et timeOffset retirés
 
   // Effet pour vérifier si on peut passer à la configuration
   useEffect(() => {
@@ -117,6 +117,9 @@ function App() {
               onScaleChange={setPreviewScale}
               isProcessing={isProcessing}
               timeOffset={timeOffset}
+              allSubtitles={subtitles}
+              smoothPhrases={smoothPhrases}
+              captureCount={captureCount}
             />
           }
         />
