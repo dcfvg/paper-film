@@ -2,16 +2,21 @@
   background: white;
   border-radius: 12px;
   padding: 1.5rem;
-  margin: 1rem 0;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  height: 100%;
 }
 
-.layout-preview-header {
+.layout-preview-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.layout-preview-header h3 {
-  margin: 0 0 0.75rem 0;
+.layout-preview-header-row h3 {
+  margin: 0;
   font-size: 1.2rem;
   font-weight: 600;
   color: #333;
@@ -19,23 +24,69 @@
 
 .layout-stats {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
   flex-wrap: wrap;
+  align-items: center;
 }
 
-.stat {
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: #f3f4f6;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+}
+
+.stat-label {
   color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.stat-value {
+  color: #667eea;
+  font-weight: 600;
   font-size: 0.9rem;
 }
 
-.stat strong {
-  color: #667eea;
-  font-weight: 600;
+.render-progress {
+  margin-bottom: 1rem;
 }
 
-.stat-separator {
-  color: #d1d5db;
+.render-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.render-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transition: width 0.3s ease;
+}
+
+.render-status {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.render-queued {
+  color: #6b7280;
+}
+
+.render-loading {
+  color: #667eea;
+  font-weight: 500;
+}
+
+.render-complete {
+  color: #10b981;
+  font-weight: 600;
 }
 
 .layout-preview-pages {
@@ -164,11 +215,80 @@
   align-items: center;
   justify-content: center;
   min-height: 0;
+  position: relative;
+  overflow: hidden;
 }
 
 .preview-image-placeholder {
   font-size: 1rem;
   opacity: 0.5;
+}
+
+.preview-image-rendered {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.preview-loader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(31, 41, 55, 0.9);
+}
+
+.preview-loader.queued .loader-icon {
+  font-size: 0.8rem;
+  opacity: 0.5;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.preview-loader.loading {
+  background: rgba(102, 126, 234, 0.2);
+}
+
+.loader-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.preview-loader.error .loader-icon {
+  font-size: 0.8rem;
+  opacity: 0.7;
 }
 
 .preview-text {
@@ -208,19 +328,36 @@
 }
 
 @media (max-width: 768px) {
+  .layout-preview-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .layout-stats {
+    width: 100%;
+  }
+
   .layout-preview-pages {
     justify-content: flex-start;
   }
   
+  .preview-page.portrait.A3,
   .preview-page.portrait.A4,
-  .preview-page.portrait.letter {
+  .preview-page.portrait.A5,
+  .preview-page.portrait.letter,
+  .preview-page.portrait.legal,
+  .preview-page.portrait.tabloid {
     width: 120px;
     height: auto;
     aspect-ratio: 210/297;
   }
   
+  .preview-page.landscape.A3,
   .preview-page.landscape.A4,
-  .preview-page.landscape.letter {
+  .preview-page.landscape.A5,
+  .preview-page.landscape.letter,
+  .preview-page.landscape.legal,
+  .preview-page.landscape.tabloid {
     width: 120px;
     height: auto;
     aspect-ratio: 297/210;

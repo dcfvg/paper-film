@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import type { SubtitleEntry } from '../types';
 import { selectSubtitles } from '../utils/subtitleParser';
 import './ProcessingControls.css';
@@ -9,6 +9,12 @@ interface ProcessingControlsProps {
   onCancel: () => void;
   isProcessing: boolean;
   progress: number;
+  captureCount: number;
+  onCaptureCountChange: (count: number) => void;
+  timeOffset: number;
+  onTimeOffsetChange: (offset: number) => void;
+  smoothPhrases: boolean;
+  onSmoothPhrasesChange: (smooth: boolean) => void;
 }
 
 export default function ProcessingControls({
@@ -16,21 +22,23 @@ export default function ProcessingControls({
   onStart,
   onCancel,
   isProcessing,
-  progress
+  progress,
+  captureCount,
+  onCaptureCountChange,
+  timeOffset,
+  onTimeOffsetChange,
+  smoothPhrases,
+  onSmoothPhrasesChange
 }: ProcessingControlsProps) {
-  const [frameCount, setFrameCount] = useState(Math.min(24, subtitles.length));
-  const [timeOffset, setTimeOffset] = useState(0); // en millisecondes
-  const [smoothPhrases, setSmoothPhrases] = useState(true);
-
   // Désactiver automatiquement smoothPhrases si frameCount === subtitles.length
   useEffect(() => {
-    if (frameCount === subtitles.length) {
-      setSmoothPhrases(false);
+    if (captureCount === subtitles.length) {
+      onSmoothPhrasesChange(false);
     }
-  }, [frameCount, subtitles.length]);
+  }, [captureCount, subtitles.length, onSmoothPhrasesChange]);
 
   const handleStart = () => {
-    const selected = selectSubtitles(subtitles, frameCount, smoothPhrases, timeOffset);
+    const selected = selectSubtitles(subtitles, captureCount, smoothPhrases, timeOffset);
     onStart(selected);
   };
 
@@ -41,15 +49,15 @@ export default function ProcessingControls({
         
         <div className="control-group">
           <label htmlFor="frame-count">
-            Nombre de captures: <strong>{frameCount}</strong>
+            Nombre de captures: <strong>{captureCount}</strong>
           </label>
           <input
             id="frame-count"
             type="range"
             min="6"
             max={subtitles.length}
-            value={frameCount}
-            onChange={(e) => setFrameCount(Number(e.target.value))}
+            value={captureCount}
+            onChange={(e) => onCaptureCountChange(Number(e.target.value))}
             disabled={isProcessing}
             className="slider"
           />
@@ -70,7 +78,7 @@ export default function ProcessingControls({
             max="5000"
             step="100"
             value={timeOffset}
-            onChange={(e) => setTimeOffset(Number(e.target.value))}
+            onChange={(e) => onTimeOffsetChange(Number(e.target.value))}
             disabled={isProcessing}
             className="slider"
           />
@@ -89,8 +97,8 @@ export default function ProcessingControls({
             <input
               type="checkbox"
               checked={smoothPhrases}
-              onChange={(e) => setSmoothPhrases(e.target.checked)}
-              disabled={isProcessing || frameCount === subtitles.length}
+              onChange={(e) => onSmoothPhrasesChange(e.target.checked)}
+              disabled={isProcessing || captureCount === subtitles.length}
               className="control-checkbox"
             />
             <span>
@@ -105,7 +113,7 @@ export default function ProcessingControls({
             📊 <strong>{subtitles.length}</strong> sous-titres détectés
           </p>
           <p>
-            🎬 <strong>{frameCount}</strong> captures seront générées
+            🎬 <strong>{captureCount}</strong> captures seront générées
           </p>
         </div>
 

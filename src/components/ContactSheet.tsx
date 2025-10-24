@@ -1,4 +1,5 @@
-import type { CapturedFrame, PrintOptions } from '../types';
+import { useEffect } from 'react';
+import type { CapturedFrame, PrintOptions, SubtitleEntry } from '../types';
 import { formatTimestamp } from '../utils/videoCapture';
 import PrintOptionsComponent from './PrintOptions';
 import LayoutPreview from './LayoutPreview';
@@ -7,21 +8,50 @@ import './ContactSheet.css';
 interface ContactSheetProps {
   frames: CapturedFrame[];
   onBack: () => void;
+  onGenerate: () => void;
   videoFileName?: string;
+  videoFile: File | null;
+  subtitles: SubtitleEntry[];
+  captureCount: number;
+  onCaptureCountChange: (count: number) => void;
+  timeOffset: number;
+  onTimeOffsetChange: (offset: number) => void;
+  smoothPhrases: boolean;
+  onSmoothPhrasesChange: (smooth: boolean) => void;
+  isProcessing: boolean;
+  progress: number;
   printOptions: PrintOptions;
   onPrintOptionsChange: (options: PrintOptions) => void;
 }
 
 export default function ContactSheet({ 
   frames, 
-  onBack, 
-  videoFileName, 
+  onBack,
+  onGenerate,
+  videoFileName,
+  videoFile,
+  subtitles,
+  captureCount,
+  onCaptureCountChange,
+  timeOffset,
+  onTimeOffsetChange,
+  smoothPhrases,
+  onSmoothPhrasesChange,
+  isProcessing,
+  progress,
   printOptions, 
   onPrintOptionsChange 
 }: ContactSheetProps) {
   const handlePrint = () => {
     window.print();
   };
+
+  // Désactiver automatiquement smoothPhrases si captureCount === subtitles.length
+  useEffect(() => {
+    if (captureCount === subtitles.length) {
+      onSmoothPhrasesChange(false);
+    }
+  }, [captureCount, subtitles.length, onSmoothPhrasesChange]);
 
   // Apply print options to CSS variables
   const gridStyle = {
@@ -38,37 +68,127 @@ export default function ContactSheet({
         ${printOptions.showTimecodes ? 'show-timecodes' : 'hide-timecodes'}`}
       style={gridStyle}
     >
-      <div className="contact-sheet-header no-print">
-        <div className="header-controls">
-          <button onClick={onBack} className="btn btn-secondary">
-            ← Retour
-          </button>
-          <h2>Planche de contact - {videoFileName}</h2>
-          <button onClick={handlePrint} className="btn btn-primary">
-            🖨️ Imprimer
-          </button>
-        </div>
-
-        <div className="header-layout">
-          <div className="header-options">
-            <PrintOptionsComponent 
-              options={printOptions} 
-              onChange={onPrintOptionsChange} 
-            />
+      <div className="contact-sheet-header-fixed no-print">
+        <div className="header-compact">
+          <div className="header-top">
+            <button onClick={onBack} className="btn btn-secondary btn-sm">
+              ← Retour
+            </button>
+            <h2 className="header-title">{videoFileName}</h2>
+            <button onClick={handlePrint} className="btn btn-primary btn-sm">
+              🖨️ Imprimer
+            </button>
           </div>
-          
-          <div className="header-preview">
-            <LayoutPreview 
-              printOptions={printOptions}
-              totalFrames={frames.length}
-            />
+
+          <div className="header-main">
+            <div className="header-left">
+              <div className="controls-section">
+                <h3 className="section-title">⚙️ Configuration</h3>
+                
+                <div className="control-row">
+                  <label htmlFor="frame-count" className="control-label">
+                    Captures: <strong>{captureCount}</strong>
+                  </label>
+                  <input
+                    id="frame-count"
+                    type="range"
+                    min="6"
+                    max={subtitles.length}
+                    value={captureCount}
+                    onChange={(e) => onCaptureCountChange(Number(e.target.value))}
+                    disabled={isProcessing}
+                    className="control-slider"
+                  />
+                  <div className="control-range-labels">
+                    <span>6</span>
+                    <span>{subtitles.length}</span>
+                  </div>
+                </div>
+
+                <div className="control-row">
+                  <label htmlFor="time-offset" className="control-label">
+                    Décalage: <strong>{timeOffset > 0 ? '+' : ''}{timeOffset}ms</strong>
+                  </label>
+                  <input
+                    id="time-offset"
+                    type="range"
+                    min="-5000"
+                    max="5000"
+                    step="100"
+                    value={timeOffset}
+                    onChange={(e) => onTimeOffsetChange(Number(e.target.value))}
+                    disabled={isProcessing}
+                    className="control-slider"
+                  />
+                  <div className="control-range-labels">
+                    <span>-5s</span>
+                    <span>+5s</span>
+                  </div>
+                </div>
+
+                <div className="control-row">
+                  <label className="control-checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={smoothPhrases}
+                      onChange={(e) => onSmoothPhrasesChange(e.target.checked)}
+                      disabled={isProcessing || captureCount === subtitles.length}
+                      className="control-checkbox"
+                    />
+                    <span>Fluidifier les phrases</span>
+                  </label>
+                </div>
+
+                <div className="control-actions">
+                  {isProcessing ? (
+                    <div className="progress-inline">
+                      <div className="progress-bar-inline">
+                        <div className="progress-fill-inline" style={{ width: `${progress}%` }} />
+                      </div>
+                      <span className="progress-text-inline">{Math.round(progress)}%</span>
+                    </div>
+                  ) : (
+                    <button onClick={onGenerate} className="btn btn-primary btn-block">
+                      🎬 Générer {captureCount} captures
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="options-section">
+                <PrintOptionsComponent 
+                  options={printOptions} 
+                  onChange={onPrintOptionsChange} 
+                />
+              </div>
+            </div>
+            
+            <div className="header-right">
+              <PrintOptionsComponent 
+                options={printOptions} 
+                onChange={onPrintOptionsChange} 
+              />
+            </div>
+            
+            <div className="header-right">
+              <LayoutPreview 
+                printOptions={printOptions}
+                totalFrames={frames.length > 0 ? frames.length : captureCount}
+                videoFile={videoFile}
+                subtitles={subtitles}
+                captureCount={captureCount}
+                timeOffset={timeOffset}
+                smoothPhrases={smoothPhrases}
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="contact-sheet-grid" style={gridStyle}>
-        {frames.map((frame, index) => (
-          <div key={index} className="frame-card">
+      <div className="contact-sheet-content">
+        <div className="contact-sheet-grid" style={gridStyle}>
+          {frames.map((frame, index) => (
+            <div key={index} className="frame-card">
             <div className="frame-image-container">
               {frame.isLoading ? (
                 <div className="frame-loading">
@@ -104,12 +224,13 @@ export default function ContactSheet({
             </div>
           </div>
         ))}
-      </div>
+        </div>
 
-      <div className="contact-sheet-footer no-print">
-        <p>
-          {frames.filter(f => !f.isLoading).length} / {frames.length} captures prêtes
-        </p>
+        <div className="contact-sheet-footer">
+          <p>
+            {frames.filter(f => !f.isLoading).length} / {frames.length} captures prêtes
+          </p>
+        </div>
       </div>
     </div>
   );

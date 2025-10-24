@@ -1,0 +1,111 @@
+.split-view {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.split-panel {
+  height: 100%;
+  overflow: auto;
+  position: relative;
+}
+
+.split-left {
+  background: #f8f9fa;
+  border-right: 1px solid #e5e7eb;
+}
+
+.split-right {
+  background: #ffffff;
+}
+
+.split-divider {
+  width: 8px;
+  height: 100%;
+  background: #e5e7eb;
+  cursor: col-resize;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.split-divider:hover {
+  background: #cbd5e1;
+}
+
+.split-view.dragging .split-divider {
+  background: #94a3b8;
+}
+
+.split-handle {
+  width: 2px;
+  height: 40px;
+  background: #64748b;
+  border-radius: 1px;
+  position: relative;
+}
+
+.split-handle::before,
+.split-handle::after {
+  content: '';
+  position: absolute;
+  width: 2px;
+  height: 40px;
+  background: #64748b;
+  border-radius: 1px;
+}
+
+.split-handle::before {
+  left: -4px;
+}
+
+.split-handle::after {
+  left: 4px;
+}
+
+@media (max-width: 768px) {
+  .split-view {
+    flex-direction: column;
+  }
+
+  .split-divider {
+    width: 100%;
+    height: 8px;
+    cursor: row-resize;
+  }
+
+  .split-panel {
+    width: 100% !important;
+  }
+
+  .split-left {
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .split-handle {
+    width: 40px;
+    height: 2px;
+  }
+
+  .split-handle::before,
+  .split-handle::after {
+    width: 40px;
+    height: 2px;
+  }
+
+  .split-handle::before {
+    left: 0;
+    top: -4px;
+  }
+
+  .split-handle::after {
+    left: 0;
+    top: 4px;
+  }
+}

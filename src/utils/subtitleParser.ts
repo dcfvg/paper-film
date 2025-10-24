@@ -195,16 +195,26 @@ export function selectSubtitles(
     return adjustedEntries;
   }
   
-  // Si smoothPhrases est désactivé, faire une sélection simple
+  // Mode simple (sans smoothPhrases) : sélection uniforme MAIS fusion des sous-titres
   if (!smoothPhrases) {
     const selected: SubtitleEntry[] = [];
-    const step = adjustedEntries.length / count;
+    const subtitlesPerCapture = Math.ceil(adjustedEntries.length / count);
     
     for (let i = 0; i < count; i++) {
-      const index = Math.floor(i * step);
+      const startIdx = i * subtitlesPerCapture;
+      const endIdx = Math.min(startIdx + subtitlesPerCapture, adjustedEntries.length);
+      const group = adjustedEntries.slice(startIdx, endIdx);
+      
+      if (group.length === 0) continue;
+      
+      // Fusionner tous les textes du groupe
+      const mergedText = group.map(s => s.text.trim()).join(' ');
+      
       selected.push({
-        ...adjustedEntries[index],
-        index: i + 1
+        index: i + 1,
+        startTime: group[0].startTime,
+        endTime: group[group.length - 1].endTime,
+        text: mergedText
       });
     }
     

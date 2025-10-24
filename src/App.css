@@ -22,9 +22,74 @@ body {
   body {
     margin: 0;
     padding: 0;
+    background: white;
   }
   
   .app {
     min-height: auto;
+  }
+
+  /* Cache tout sauf le contenu de preview-panel */
+  .split-view {
+    display: block !important;
+  }
+
+  .split-panel.split-left,
+  .split-divider {
+    display: none !important;
+  }
+
+  .split-panel.split-right {
+    width: 100% !important;
+    overflow: visible !important;
+  }
+
+  .preview-header,
+  .page-number,
+  .processing-overlay {
+    display: none !important;
+  }
+
+  .preview-panel {
+    overflow: visible !important;
+    background: white !important;
+  }
+
+  .preview-pages {
+    padding: 0 !important;
+  }
+
+  .preview-page {
+    transform: none !important;
+    box-shadow: none !important;
+    page-break-after: always;
+    margin: 0 !important;
+    padding: 1cm !important;
+    width: 100% !important;
+    height: 100% !important;
+    aspect-ratio: inherit !important;
+    box-sizing: border-box !important;
+  }
+
+  .preview-page:last-child {
+    page-break-after: auto;
+  }
+
+  .contact-sheet-grid {
+    gap: 0.5rem !important;
+    height: 100% !important;
+  }
+
+  .capture-item {
+    page-break-inside: avoid;
+  }
+
+  /* Définir les dimensions réelles pour chaque format */
+  @page {
+    margin: 0;
+  }
+
+  @page :first {
+    margin: 0;
   }
 }

@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import FileDropzone from './components/FileDropzone';
-import ProcessingControls from './components/ProcessingControls';
-import ContactSheet from './components/ContactSheet';
-import { parseSubtitleFile } from './utils/subtitleParser';
+import { SplitView } from './components/SplitView';
+import { ConfigPanel } from './components/ConfigPanel';
+import { PreviewPanel } from './components/PreviewPanel';
+import { parseSubtitleFile, selectSubtitles } from './utils/subtitleParser';
 import { useFrameCapture } from './hooks/useFrameCapture';
 import type { SubtitleEntry, PrintOptions } from './types';
 import './App.css';
 
-type AppState = 'upload' | 'configure' | 'processing' | 'result';
+type AppState = 'upload' | 'result';
 
 function App() {
   const [state, setState] = useState<AppState>('upload');
@@ -15,23 +16,38 @@ function App() {
   const [subtitleFile, setSubtitleFile] = useState<File | null>(null);
   const [subtitles, setSubtitles] = useState<SubtitleEntry[]>([]);
   const [isParsingSubtitles, setIsParsingSubtitles] = useState(false);
+  const [captureCount, setCaptureCount] = useState(30);
+  const [timeOffset, setTimeOffset] = useState(0);
+  const [smoothPhrases, setSmoothPhrases] = useState(true);
+  const [previewScale, setPreviewScale] = useState(0.5); // 50% par défaut
   const [printOptions, setPrintOptions] = useState<PrintOptions>({
     orientation: 'portrait',
     columns: 3,
     showTimecodes: true,
     subtitleFontSize: 8,
     pageFormat: 'A4',
-    captureCount: 30,
-    timeOffset: 0,
-    smoothPhrases: true,
   });
   
-  const { frames, isProcessing, progress, captureFrames, reset } = useFrameCapture();
+  const { frames, isProcessing, captureFrames, reset } = useFrameCapture();
+
+  // Debounce timer for auto-generation
+  useEffect(() => {
+    if (state !== 'result' || !videoFile || subtitles.length === 0) return;
+
+    const timer = setTimeout(() => {
+      const selected = selectSubtitles(subtitles, captureCount, smoothPhrases, 0); // timeOffset n'affecte pas la capture
+      captureFrames(videoFile, selected);
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timer);
+  }, [captureCount, smoothPhrases, videoFile, subtitles, state]); // Retiré timeOffset
 
   // Effet pour vérifier si on peut passer à la configuration
   useEffect(() => {
     if (videoFile && subtitleFile && subtitles.length > 0 && !isParsingSubtitles && state === 'upload') {
-      setState('configure');
+      // Initialiser captureCount basé sur le nombre de sous-titres
+      setCaptureCount(Math.min(30, subtitles.length));
+      setState('result');
     }
   }, [videoFile, subtitleFile, subtitles, isParsingSubtitles, state]);
 
@@ -55,24 +71,12 @@ function App() {
     }
   };
 
-  const handleStartProcessing = async (selectedSubs: SubtitleEntry[]) => {
-    if (!videoFile) return;
-    
-    setState('processing');
-    await captureFrames(videoFile, selectedSubs);
-    setState('result');
-  };
-
   const handleCancel = () => {
     setState('upload');
     setVideoFile(null);
     setSubtitleFile(null);
     setSubtitles([]);
     reset();
-  };
-
-  const handleBack = () => {
-    setState('configure');
   };
 
   return (
@@ -86,23 +90,35 @@ function App() {
         />
       )}
 
-      {(state === 'configure' || state === 'processing') && (
-        <ProcessingControls
-          subtitles={subtitles}
-          onStart={handleStartProcessing}
-          onCancel={handleCancel}
-          isProcessing={isProcessing}
-          progress={progress}
-        />
-      )}
-
-      {state === 'result' && (
-        <ContactSheet
-          frames={frames}
-          onBack={handleBack}
-          videoFileName={videoFile?.name}
-          printOptions={printOptions}
-          onPrintOptionsChange={setPrintOptions}
+      {state === 'result' && videoFile && (
+        <SplitView
+          defaultSplit={30}
+          minSize={20}
+          left={
+            <ConfigPanel
+              videoFile={videoFile}
+              subtitles={subtitles}
+              captureCount={captureCount}
+              onCaptureCountChange={setCaptureCount}
+              timeOffset={timeOffset}
+              onTimeOffsetChange={setTimeOffset}
+              smoothPhrases={smoothPhrases}
+              onSmoothPhrasesChange={setSmoothPhrases}
+              printOptions={printOptions}
+              onPrintOptionsChange={setPrintOptions}
+              onBack={handleCancel}
+            />
+          }
+          right={
+            <PreviewPanel
+              frames={frames}
+              printOptions={printOptions}
+              scale={previewScale}
+              onScaleChange={setPreviewScale}
+              isProcessing={isProcessing}
+              timeOffset={timeOffset}
+            />
+          }
         />
       )}
     </div>
