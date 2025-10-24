@@ -22,3 +22,12 @@ export interface SubtitleFile {
   file: File;
   entries: SubtitleEntry[];
 }
+
+export interface PrintOptions {
+  orientation: 'portrait' | 'landscape';
+  columns: number;
+  showTimecodes: boolean;
+  subtitleFontSize: number; // en pt
+  pageFormat: 'A4' | 'letter';
+  captureCount?: number; // nombre de captures souhaité
+}

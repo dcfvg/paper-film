@@ -166,9 +166,21 @@
 
   .contact-sheet-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
     gap: 0.5cm;
     margin: 0;
+  }
+
+  /* Colonnes - par défaut 3 */
+  .cols-2 .contact-sheet-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cols-3 .contact-sheet-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .cols-4 .contact-sheet-grid {
+    grid-template-columns: repeat(4, 1fr);
   }
 
   .frame-card {
@@ -199,7 +211,7 @@
   }
 
   .frame-subtitle {
-    font-size: 8pt;
+    font-size: var(--subtitle-font-size, 8pt);
     line-height: 1.3;
     word-wrap: break-word;
     overflow-wrap: break-word;
@@ -207,14 +219,42 @@
   }
 
   .frame-timestamp {
-    font-size: 8pt;
+    font-size: calc(var(--subtitle-font-size, 8pt) * 0.9);
     margin-bottom: 0.2cm;
   }
 
-  /* Optimisation pour A4 */
-  @page {
-    size: A4 portrait;
-    margin: 0.8cm;
+  /* Cacher timecodes si option désactivée */
+  .hide-timecodes .frame-timestamp {
+    display: none;
+  }
+
+  /* Formats de page */
+  .portrait.A4 {
+    @page {
+      size: A4 portrait;
+      margin: 0.8cm;
+    }
+  }
+
+  .landscape.A4 {
+    @page {
+      size: A4 landscape;
+      margin: 0.8cm;
+    }
+  }
+
+  .portrait.letter {
+    @page {
+      size: letter portrait;
+      margin: 0.8cm;
+    }
+  }
+
+  .landscape.letter {
+    @page {
+      size: letter landscape;
+      margin: 0.8cm;
+    }
   }
 }
 

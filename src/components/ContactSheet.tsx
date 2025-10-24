@@ -1,20 +1,43 @@
-import type { CapturedFrame } from '../types';
+import type { CapturedFrame, PrintOptions } from '../types';
 import { formatTimestamp } from '../utils/videoCapture';
+import PrintOptionsComponent from './PrintOptions';
+import LayoutPreview from './LayoutPreview';
 import './ContactSheet.css';
 
 interface ContactSheetProps {
   frames: CapturedFrame[];
   onBack: () => void;
   videoFileName?: string;
+  printOptions: PrintOptions;
+  onPrintOptionsChange: (options: PrintOptions) => void;
 }
 
-export default function ContactSheet({ frames, onBack, videoFileName }: ContactSheetProps) {
+export default function ContactSheet({ 
+  frames, 
+  onBack, 
+  videoFileName, 
+  printOptions, 
+  onPrintOptionsChange 
+}: ContactSheetProps) {
   const handlePrint = () => {
     window.print();
   };
 
+  // Apply print options to CSS variables
+  const gridStyle = {
+    '--columns': printOptions.columns,
+    '--subtitle-font-size': `${printOptions.subtitleFontSize}pt`,
+  } as React.CSSProperties;
+
   return (
-    <div className="contact-sheet-container">
+    <div 
+      className={`contact-sheet-container 
+        cols-${printOptions.columns} 
+        ${printOptions.orientation} 
+        ${printOptions.pageFormat}
+        ${printOptions.showTimecodes ? 'show-timecodes' : 'hide-timecodes'}`}
+      style={gridStyle}
+    >
       <div className="contact-sheet-controls no-print">
         <button onClick={onBack} className="btn btn-secondary">
           ← Retour
@@ -25,7 +48,19 @@ export default function ContactSheet({ frames, onBack, videoFileName }: ContactS
         </button>
       </div>
 
-      <div className="contact-sheet-grid">
+      <div className="no-print">
+        <PrintOptionsComponent 
+          options={printOptions} 
+          onChange={onPrintOptionsChange} 
+        />
+        
+        <LayoutPreview 
+          printOptions={printOptions}
+          totalFrames={frames.length}
+        />
+      </div>
+
+      <div className="contact-sheet-grid" style={gridStyle}>
         {frames.map((frame, index) => (
           <div key={index} className="frame-card">
             <div className="frame-image-container">
@@ -52,9 +87,11 @@ export default function ContactSheet({ frames, onBack, videoFileName }: ContactS
             </div>
             
             <div className="frame-info">
-              <div className="frame-timestamp">
-                {formatTimestamp(frame.timestamp)}
-              </div>
+              {printOptions.showTimecodes && (
+                <div className="frame-timestamp">
+                  {formatTimestamp(frame.timestamp)}
+                </div>
+              )}
               <div className="frame-subtitle">
                 {frame.subtitle}
               </div>

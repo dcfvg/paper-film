@@ -4,7 +4,7 @@ import ProcessingControls from './components/ProcessingControls';
 import ContactSheet from './components/ContactSheet';
 import { parseSubtitleFile } from './utils/subtitleParser';
 import { useFrameCapture } from './hooks/useFrameCapture';
-import type { SubtitleEntry } from './types';
+import type { SubtitleEntry, PrintOptions } from './types';
 import './App.css';
 
 type AppState = 'upload' | 'configure' | 'processing' | 'result';
@@ -15,6 +15,14 @@ function App() {
   const [subtitleFile, setSubtitleFile] = useState<File | null>(null);
   const [subtitles, setSubtitles] = useState<SubtitleEntry[]>([]);
   const [isParsingSubtitles, setIsParsingSubtitles] = useState(false);
+  const [printOptions, setPrintOptions] = useState<PrintOptions>({
+    orientation: 'portrait',
+    columns: 3,
+    showTimecodes: true,
+    subtitleFontSize: 8,
+    pageFormat: 'A4',
+    captureCount: 30,
+  });
   
   const { frames, isProcessing, progress, captureFrames, reset } = useFrameCapture();
 
@@ -45,11 +53,11 @@ function App() {
     }
   };
 
-  const handleStartProcessing = async (selectedSubtitles: SubtitleEntry[]) => {
+  const handleStartProcessing = async (selectedSubs: SubtitleEntry[]) => {
     if (!videoFile) return;
     
     setState('processing');
-    await captureFrames(videoFile, selectedSubtitles);
+    await captureFrames(videoFile, selectedSubs);
     setState('result');
   };
 
@@ -91,6 +99,8 @@ function App() {
           frames={frames}
           onBack={handleBack}
           videoFileName={videoFile?.name}
+          printOptions={printOptions}
+          onPrintOptionsChange={setPrintOptions}
         />
       )}
     </div>

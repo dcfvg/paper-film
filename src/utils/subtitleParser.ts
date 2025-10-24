@@ -116,8 +116,16 @@ export async function parseSubtitleFile(file: File): Promise<SubtitleEntry[]> {
 }
 
 /**
+ * Vérifie si un texte se termine par une ponctuation finale
+ */
+function endsWithFinalPunctuation(text: string): boolean {
+  const trimmed = text.trim();
+  return /[.!?;:]$/.test(trimmed);
+}
+
+/**
  * Sélectionne un nombre donné de sous-titres espacés uniformément
- * Si le nombre demandé est inférieur au nombre total, fusionne les textes
+ * Si le nombre demandé est inférieur au nombre total, fusionne les textes intelligemment
  */
 export function selectSubtitles(entries: SubtitleEntry[], count: number): SubtitleEntry[] {
   if (entries.length === 0) return [];
@@ -133,8 +141,47 @@ export function selectSubtitles(entries: SubtitleEntry[], count: number): Subtit
     
     if (group.length === 0) continue;
     
-    // Fusionner les textes du groupe
-    const mergedText = group.map(sub => sub.text).join(' ');
+    // Fusionner les textes du groupe avec logique intelligente
+    const textParts: string[] = [];
+    let currentText = '';
+    
+    for (let j = 0; j < group.length; j++) {
+      const sub = group[j];
+      const isLast = j === group.length - 1;
+      const trimmedText = sub.text.trim();
+      
+      if (currentText) {
+        currentText += ' ' + trimmedText;
+      } else {
+        currentText = trimmedText;
+      }
+      
+      // Si le texte se termine par une ponctuation finale, on peut couper ici
+      if (endsWithFinalPunctuation(currentText)) {
+        textParts.push(currentText);
+        currentText = '';
+      } else if (isLast) {
+        // Dernier sous-titre du groupe
+        if (i < count - 1) {
+          // Pas le dernier groupe -> ajouter ...
+          textParts.push(currentText + '…');
+        } else {
+          textParts.push(currentText);
+        }
+        currentText = '';
+      }
+    }
+    
+    // S'il reste du texte non ajouté
+    if (currentText) {
+      if (i < count - 1) {
+        textParts.push(currentText + '…');
+      } else {
+        textParts.push(currentText);
+      }
+    }
+    
+    const mergedText = textParts.join(' ');
     
     // Utiliser le timestamp du premier sous-titre du groupe
     selected.push({
