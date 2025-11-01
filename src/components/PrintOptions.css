@@ -57,7 +57,7 @@
   appearance: none;
   height: 6px;
   border-radius: 3px;
-  background: rgba(255, 255, 255, 0.3);
+  background: #e5e7eb;
   outline: none;
   cursor: pointer;
 }
@@ -68,29 +68,29 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: white;
+  background: #667eea;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s;
+  transition: all 0.2s;
 }
 
 .option-slider::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
+  background: #5568d3;
+  transform: scale(1.1);
 }
 
 .option-slider::-moz-range-thumb {
   width: 18px;
   height: 18px;
-  border-radius: 50%;
-  background: white;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   border: none;
-  transition: transform 0.2s;
+  border-radius: 50%;
+  background: #667eea;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .option-slider::-moz-range-thumb:hover {
-  transform: scale(1.2);
+  background: #5568d3;
+  transform: scale(1.1);
 }
 
 .option-value {

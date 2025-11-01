@@ -12,102 +12,142 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+    'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* Styles globaux pour l'impression */
 @media print {
-  body {
-    margin: 0;
-    padding: 0;
-    background: white;
-  }
-  
-  .app {
-    min-height: auto;
+  /* Configuration de la page */
+  @page {
+    margin: 1cm;
+    size: auto;
   }
 
-  /* Cache tout sauf le contenu de preview-panel */
+  /* Reset du body */
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    overflow: visible !important;
+  }
+
+  .app {
+    min-height: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Masquer tous les éléments d'interface */
+  .split-panel.split-left,
+  .split-divider,
+  .preview-header,
+  .page-number,
+  .processing-overlay,
+  .stat-badge,
+  .processing-badge {
+    display: none !important;
+  }
+
+  /* Afficher uniquement le contenu */
   .split-view {
     display: block !important;
-  }
-
-  .split-panel.split-left,
-  .split-divider {
-    display: none !important;
+    height: auto !important;
+    overflow: visible !important;
   }
 
   .split-panel.split-right {
     width: 100% !important;
+    height: auto !important;
     overflow: visible !important;
-  }
-
-  .preview-header,
-  .page-number,
-  .processing-overlay {
-    display: none !important;
+    position: static !important;
   }
 
   .preview-panel {
     overflow: visible !important;
     background: white !important;
     height: auto !important;
+    position: static !important;
   }
 
-  .preview-pages {
+  /* Simplifier la structure : pas de pages simulées */
+  .preview-content {
     padding: 0 !important;
-    display: block !important;
-    grid-template-columns: none !important;
-    gap: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
   }
 
   .preview-page {
-    transform: none !important;
-    box-shadow: none !important;
-    page-break-after: always;
-    page-break-before: auto;
-    page-break-inside: avoid;
-    margin: 0 !important;
-    padding: 1cm !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    height: auto !important;
-    min-height: auto !important;
-    box-sizing: border-box !important;
-    display: block !important;
+    display: none !important;
   }
 
-  .preview-page:last-child {
-    page-break-after: auto;
-  }
-
-  .preview-page:first-child {
-    page-break-before: avoid;
-  }
-
+  /* Grille de captures : conserve la mise en page */
   .contact-sheet-grid {
-    gap: 0.5rem !important;
-    height: auto !important;
     display: grid !important;
+    width: 100% !important;
+    height: auto !important;
+    gap: 0.5cm !important;
     page-break-inside: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
+  .contact-sheet-grid.cols-1 {
+    grid-template-columns: repeat(1, 1fr) !important;
+  }
+
+  .contact-sheet-grid.cols-2 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .contact-sheet-grid.cols-3 {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  .contact-sheet-grid.cols-4 {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+
+  /* Empêcher la coupure des captures entre les pages */
   .capture-item {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
+    display: block !important;
+    width: 100% !important;
   }
 
   .capture-image-wrapper {
     page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    aspect-ratio: 16 / 9 !important;
+    width: 100% !important;
+    background: #1f2937 !important;
   }
 
-  /* Définir les dimensions réelles pour chaque format */
-  @page {
-    margin: 1cm;
-    size: auto;
+  .capture-image {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    display: block !important;
+  }
+
+  .capture-subtitle {
+    display: block !important;
+    margin-top: 0.3cm !important;
+    padding-left: 0.3cm !important;
+    padding-right: 0.3cm !important;
+  }
+
+  .capture-timecode {
+    display: block !important;
+    margin-bottom: 0.2cm !important;
+  }
+
+  .capture-text {
+    display: block !important;
+    line-height: 1.4 !important;
   }
 }

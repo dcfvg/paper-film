@@ -19,15 +19,14 @@ function App() {
   const [captureCount, setCaptureCount] = useState(30);
   const [timeOffset, setTimeOffset] = useState(0);
   const [smoothPhrases, setSmoothPhrases] = useState(true);
-  const [previewScale, setPreviewScale] = useState(0.5); // 50% par défaut
   const [printOptions, setPrintOptions] = useState<PrintOptions>({
     orientation: 'portrait',
     columns: 3,
     showTimecodes: true,
     subtitleFontSize: 8,
-    pageFormat: 'A4',
+    pageFormat: 'A4'
   });
-  
+
   const { frames, isProcessing, captureFrames, reset } = useFrameCapture();
 
   // Debounce timer for auto-generation
@@ -40,11 +39,17 @@ function App() {
     }, 500); // 500ms debounce
 
     return () => clearTimeout(timer);
-  }, [captureCount, videoFile, subtitles, state]); // smoothPhrases et timeOffset retirés
+  }, [captureCount, videoFile, subtitles, state, captureFrames]); // smoothPhrases et timeOffset retirés
 
   // Effet pour vérifier si on peut passer à la configuration
   useEffect(() => {
-    if (videoFile && subtitleFile && subtitles.length > 0 && !isParsingSubtitles && state === 'upload') {
+    if (
+      videoFile &&
+      subtitleFile &&
+      subtitles.length > 0 &&
+      !isParsingSubtitles &&
+      state === 'upload'
+    ) {
       // Initialiser captureCount basé sur le nombre de sous-titres
       setCaptureCount(Math.min(30, subtitles.length));
       setState('result');
@@ -58,7 +63,7 @@ function App() {
   const handleSubtitleSelect = async (file: File) => {
     setSubtitleFile(file);
     setIsParsingSubtitles(true);
-    
+
     try {
       const parsedSubtitles = await parseSubtitleFile(file);
       setSubtitles(parsedSubtitles);
@@ -96,7 +101,6 @@ function App() {
           minSize={20}
           left={
             <ConfigPanel
-              videoFile={videoFile}
               subtitles={subtitles}
               captureCount={captureCount}
               onCaptureCountChange={setCaptureCount}
@@ -113,13 +117,12 @@ function App() {
             <PreviewPanel
               frames={frames}
               printOptions={printOptions}
-              scale={previewScale}
-              onScaleChange={setPreviewScale}
               isProcessing={isProcessing}
               timeOffset={timeOffset}
               allSubtitles={subtitles}
               smoothPhrases={smoothPhrases}
               captureCount={captureCount}
+              videoFileName={videoFile.name}
             />
           }
         />

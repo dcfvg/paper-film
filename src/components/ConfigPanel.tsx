@@ -3,10 +3,9 @@ import PrintOptions from './PrintOptions';
 import './ConfigPanel.css';
 
 interface ConfigPanelProps {
-  // Video and subtitle info
-  videoFile: File;
+  // Subtitle info
   subtitles: Array<{ index: number; startTime: number; endTime: number; text: string }>;
-  
+
   // Capture settings
   captureCount: number;
   onCaptureCountChange: (count: number) => void;
@@ -14,7 +13,7 @@ interface ConfigPanelProps {
   onTimeOffsetChange: (offset: number) => void;
   smoothPhrases: boolean;
   onSmoothPhrasesChange: (enabled: boolean) => void;
-  
+
   // Print options
   printOptions: PrintOptionsType;
   onPrintOptionsChange: (options: PrintOptionsType) => void;
@@ -24,7 +23,6 @@ interface ConfigPanelProps {
 }
 
 export function ConfigPanel({
-  videoFile,
   subtitles,
   captureCount,
   onCaptureCountChange,
@@ -34,46 +32,24 @@ export function ConfigPanel({
   onSmoothPhrasesChange,
   printOptions,
   onPrintOptionsChange,
-  onBack,
+  onBack
 }: ConfigPanelProps) {
-  
-  const handlePrint = () => {
-    window.print();
-  };
-  
   return (
     <div className="config-panel">
       <div className="config-header">
-        <h2>Configuration</h2>
+        <h2>Ciné-Roman</h2>
         <div className="config-actions">
           {onBack && (
             <button onClick={onBack} className="btn-secondary">
               ← Retour
             </button>
           )}
-          <button onClick={handlePrint} className="btn-primary">
-            🖨️ Imprimer
-          </button>
         </div>
       </div>
 
-      <div className="config-section">
-        <h3>📹 Fichiers</h3>
-        <div className="file-info">
-          <div className="file-item">
-            <span className="file-label">Vidéo:</span>
-            <span className="file-name">{videoFile.name}</span>
-          </div>
-          <div className="file-item">
-            <span className="file-label">Sous-titres:</span>
-            <span className="file-count">{subtitles.length} entrées</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="config-section">
+      <div className="config-group">
         <h3>🎬 Captures</h3>
-        
+
         <div className="config-control">
           <label htmlFor="capture-count">
             Nombre de captures: <strong>{captureCount}</strong>
@@ -81,21 +57,25 @@ export function ConfigPanel({
           <input
             id="capture-count"
             type="range"
-            min="6"
+            min="1"
             max={subtitles.length}
             value={captureCount}
             onChange={(e) => onCaptureCountChange(parseInt(e.target.value))}
             className="config-slider"
           />
           <div className="slider-labels">
-            <span>6</span>
+            <span>1</span>
             <span>{subtitles.length}</span>
           </div>
         </div>
 
         <div className="config-control">
           <label htmlFor="time-offset">
-            Décalage sous-titres: <strong>{timeOffset > 0 ? '+' : ''}{timeOffset}s</strong>
+            Décalage sous-titres:{' '}
+            <strong>
+              {timeOffset > 0 ? '+' : ''}
+              {timeOffset}s
+            </strong>
           </label>
           <input
             id="time-offset"
@@ -113,30 +93,22 @@ export function ConfigPanel({
           </div>
         </div>
 
-        <div className="config-control">
+        <div className="option-group checkbox-group">
           <label className="checkbox-label">
             <input
               type="checkbox"
               checked={smoothPhrases}
               onChange={(e) => onSmoothPhrasesChange(e.target.checked)}
+              className="option-checkbox"
             />
-            <span>Phrases fluides (répartition harmonieuse)</span>
+            <span>Texte fluide</span>
           </label>
-          <p className="help-text">
-            {captureCount === subtitles.length 
-              ? "Distribue les sous-titres de façon harmonieuse entre les captures"
-              : "Évite les coupures de guillemets, questions et phrases courtes"
-            }
-          </p>
         </div>
       </div>
 
-      <div className="config-section">
-        <h3>🖨️ Options d'impression</h3>
-        <PrintOptions
-          options={printOptions}
-          onChange={onPrintOptionsChange}
-        />
+      <div className="config-group">
+        <h3>🖨️ Impression</h3>
+        <PrintOptions options={printOptions} onChange={onPrintOptionsChange} />
       </div>
     </div>
   );
