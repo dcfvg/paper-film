@@ -154,40 +154,41 @@ function hasOpenQuote(text: string): boolean {
 }
 
 /**
- * Vérifie si un texte est une question
+ * Vérifie si le prochain sous-titre semble continuer la narration
+ * (commence par minuscule, par "et", "ou", "mais", etc.)
  */
-function isQuestion(text: string): boolean {
-  return text.trim().endsWith('?');
-}
+function isContinuation(nextSubtitleText: string): boolean {
+  if (!nextSubtitleText) return false;
 
-/**
- * Vérifie si un texte est court (moins de 30 caractères)
- */
-function isShortPhrase(text: string): boolean {
-  return text.trim().length < 30;
-}
+  const trimmed = nextSubtitleText.trim();
+  if (!trimmed) return false;
 
-/**
- * Vérifie si on peut couper à cet endroit
- */
-function canCutHere(text: string, nextText: string | undefined): boolean {
-  // Ne pas couper si on a une citation ouverte
-  if (hasOpenQuote(text)) {
-    return false;
+  // Commence par une minuscule
+  if (trimmed[0] === trimmed[0].toLowerCase() && trimmed[0] !== trimmed[0].toUpperCase()) {
+    return true;
   }
 
-  // Ne pas couper si c'est une question courte
-  if (isQuestion(text) && isShortPhrase(text)) {
-    return false;
-  }
+  // Commence par des conjonctions de coordination
+  const continuationWords = [
+    'et ',
+    'ou ',
+    'mais ',
+    'donc ',
+    'or ',
+    'ni ',
+    'car ',
+    'puis ',
+    'ensuite ',
+    'alors ',
+    'ainsi ',
+    'pourtant ',
+    'cependant ',
+    'néanmoins ',
+    'toutefois '
+  ];
 
-  // Ne pas couper si la phrase suivante est très courte (continuation probable)
-  if (nextText && isShortPhrase(nextText)) {
-    return false;
-  }
-
-  // Sinon, on peut couper si c'est une fin de phrase
-  return endsWithFinalPunctuation(text);
+  const lowerTrimmed = trimmed.toLowerCase();
+  return continuationWords.some((word) => lowerTrimmed.startsWith(word));
 }
 
 /**
@@ -214,28 +215,22 @@ export function selectSubtitles(
 
   // Si on demande autant ou plus de captures que de sous-titres
   if (count >= adjustedEntries.length) {
-    // Si smoothPhrases activé, utiliser la logique intelligente pour répartir harmonieusement
-    if (smoothPhrases && count === adjustedEntries.length) {
-      // On continue vers la logique smoothPhrases ci-dessous
-    } else {
-      // Retourner tous les sous-titres tels quels
-      return adjustedEntries;
-    }
+    return adjustedEntries;
   }
 
-  // Mode simple (sans smoothPhrases) : sélection uniforme MAIS fusion des sous-titres
+  // Mode sans smoothPhrases : fusion basique des sous-titres
   if (!smoothPhrases) {
     const selected: SubtitleEntry[] = [];
-    const subtitlesPerCapture = Math.ceil(adjustedEntries.length / count);
+    const itemsPerGroup = Math.ceil(adjustedEntries.length / count);
 
     for (let i = 0; i < count; i++) {
-      const startIdx = i * subtitlesPerCapture;
-      const endIdx = Math.min(startIdx + subtitlesPerCapture, adjustedEntries.length);
+      const startIdx = i * itemsPerGroup;
+      const endIdx = Math.min(startIdx + itemsPerGroup, adjustedEntries.length);
       const group = adjustedEntries.slice(startIdx, endIdx);
 
       if (group.length === 0) continue;
 
-      // Fusionner tous les textes du groupe
+      // Fusionner tous les sous-titres du groupe simplement
       const mergedText = group.map((s) => s.text.trim()).join(' ');
 
       selected.push({
@@ -249,108 +244,125 @@ export function selectSubtitles(
     return selected;
   }
 
+  // Mode smoothPhrases : distribuer TOUT le texte en évitant de couper phrases/citations
   const selected: SubtitleEntry[] = [];
-  const subtitlesPerCapture = Math.ceil(adjustedEntries.length / count);
-  let previousWasCut = false;
-  let accumulatedQuoteContext = ''; // Pour gérer les citations sur plusieurs groupes
+  const itemsPerGroup = adjustedEntries.length / count;
+  let currentIndex = 0;
 
-  for (let i = 0; i < count; i++) {
-    const startIdx = i * subtitlesPerCapture;
-    const endIdx = Math.min(startIdx + subtitlesPerCapture, adjustedEntries.length);
-    const group = adjustedEntries.slice(startIdx, endIdx);
+  for (let groupNum = 0; groupNum < count; groupNum++) {
+    const targetEndIndex = Math.floor((groupNum + 1) * itemsPerGroup);
+    const isLastGroup = groupNum === count - 1;
 
-    if (group.length === 0) continue;
+    // Pour le dernier groupe, prendre tout ce qui reste
+    const maxEndIndex = isLastGroup ? adjustedEntries.length : targetEndIndex;
 
-    // Fusionner les textes du groupe avec logique intelligente
-    const textParts: string[] = [];
-    let currentText = accumulatedQuoteContext; // Commencer avec le contexte de citation
-    accumulatedQuoteContext = '';
+    if (currentIndex >= adjustedEntries.length) break;
 
-    for (let j = 0; j < group.length; j++) {
-      const sub = group[j];
-      const nextSub = group[j + 1];
-      const isLast = j === group.length - 1;
-      let trimmedText = sub.text.trim();
+    // Collecter les sous-titres pour ce groupe
+    let groupText = '';
+    const startTime = adjustedEntries[currentIndex].startTime;
+    let endTime = adjustedEntries[currentIndex].endTime;
+    let endIndex = currentIndex;
+    let textWasCut = false;
 
-      // Ajouter … au début si la phrase précédente était coupée (et pas de contexte de citation)
-      if (j === 0 && previousWasCut && !currentText) {
-        trimmedText = '…' + trimmedText;
-      }
+    // TOUJOURS prendre au moins un sous-titre pour éviter les groupes vides
+    const minEndIndex = currentIndex + 1;
 
-      if (currentText) {
-        currentText += ' ' + trimmedText;
-      } else {
-        currentText = trimmedText;
-      }
+    // Ajouter les sous-titres jusqu'à la cible
+    while (endIndex < maxEndIndex && endIndex < adjustedEntries.length) {
+      const sub = adjustedEntries[endIndex];
+      groupText += (groupText ? ' ' : '') + sub.text.trim();
+      endTime = sub.endTime;
+      endIndex++;
 
-      // Vérifier si on peut couper ici
-      const nextText = nextSub?.text.trim();
-      const hasOpenCitation = hasOpenQuote(currentText);
+      // Si on a atteint la cible (et pris au moins un sous-titre), vérifier si on peut couper
+      if (endIndex >= targetEndIndex && endIndex >= minEndIndex && !isLastGroup) {
+        const hasOpenCitation = hasOpenQuote(groupText);
+        const endsWithPunctuation = endsWithFinalPunctuation(groupText);
+        const remainingEntries = adjustedEntries.slice(endIndex);
+        const remainingText = remainingEntries.map((s) => s.text).join(' ');
+        const isRemainingShort = remainingText.trim().length < 50;
 
-      if (!hasOpenCitation && canCutHere(currentText, nextText)) {
-        textParts.push(currentText);
-        currentText = '';
-        previousWasCut = false;
-      } else if (isLast) {
-        // Dernier sous-titre du groupe
-        if (i < count - 1) {
-          // Pas le dernier groupe
-          if (hasOpenCitation) {
-            // Citation ouverte : ne pas ajouter ..., garder pour le prochain groupe
-            accumulatedQuoteContext = currentText;
-            previousWasCut = false;
-          } else if (!endsWithFinalPunctuation(currentText)) {
-            textParts.push(currentText + '…');
-            previousWasCut = true;
-          } else {
-            textParts.push(currentText);
-            previousWasCut = false;
+        // Vérifier si le prochain sous-titre est une continuation
+        const nextIsContinuation =
+          endIndex < adjustedEntries.length && isContinuation(adjustedEntries[endIndex].text);
+
+        // Continuer si : citation ouverte, pas de ponctuation, reste trop court, OU le prochain continue
+        if (hasOpenCitation || !endsWithPunctuation || isRemainingShort || nextIsContinuation) {
+          // Regarder jusqu'à 3 sous-titres de plus
+          const lookAheadLimit = Math.min(endIndex + 3, adjustedEntries.length);
+          let shouldContinue = true;
+
+          while (endIndex < lookAheadLimit && shouldContinue) {
+            const nextSub = adjustedEntries[endIndex];
+            groupText += ' ' + nextSub.text.trim();
+            endTime = nextSub.endTime;
+            endIndex++;
+
+            // Vérifier si on peut couper maintenant
+            const hasOpenCitationNow = hasOpenQuote(groupText);
+            const endsWithPunctuationNow = endsWithFinalPunctuation(groupText);
+            const nextIsContinuationNow =
+              endIndex < adjustedEntries.length && isContinuation(adjustedEntries[endIndex].text);
+
+            // Couper seulement si: pas de citation ouverte, ponctuation finale, ET le prochain ne continue pas
+            if (!hasOpenCitationNow && endsWithPunctuationNow && !nextIsContinuationNow) {
+              shouldContinue = false;
+            }
           }
-        } else {
-          textParts.push(currentText);
-          previousWasCut = false;
         }
-        currentText = '';
+
+        // Si on a coupé et qu'il reste du texte, marquer comme coupé
+        if (endIndex < adjustedEntries.length) {
+          textWasCut = true;
+        }
+        break;
       }
     }
 
-    // S'il reste du texte non ajouté
-    if (currentText && !accumulatedQuoteContext) {
-      if (i < count - 1) {
-        const hasOpenCitation = hasOpenQuote(currentText);
-        if (hasOpenCitation) {
-          accumulatedQuoteContext = currentText;
-          previousWasCut = false;
-        } else if (!endsWithFinalPunctuation(currentText)) {
-          textParts.push(currentText + '…');
-          previousWasCut = true;
-        } else {
-          textParts.push(currentText);
-          previousWasCut = false;
-        }
-      } else {
-        textParts.push(currentText);
-        previousWasCut = false;
+    // Ajouter des ellipses si le texte a été coupé et qu'il reste du contenu
+    if (textWasCut && endIndex < adjustedEntries.length) {
+      const remainingText = adjustedEntries
+        .slice(endIndex)
+        .map((s) => s.text.trim())
+        .join(' ');
+      // Ajouter des ellipses si :
+      // 1. Le texte ne se termine pas par une ponctuation finale, OU
+      // 2. Le texte se termine par une ponctuation mais le prochain sous-titre continue la narration
+      if (!endsWithFinalPunctuation(groupText)) {
+        groupText += '…';
+      } else if (
+        remainingText.trim().length > 0 &&
+        isContinuation(adjustedEntries[endIndex].text)
+      ) {
+        // Si la phrase suivante continue, ajouter des ellipses même après un point
+        groupText += ' …';
       }
     }
 
-    // Si on a du contexte accumulé mais c'est le dernier groupe, l'ajouter
-    if (accumulatedQuoteContext && i === count - 1) {
-      textParts.push(accumulatedQuoteContext);
-      accumulatedQuoteContext = '';
+    selected.push({
+      index: groupNum + 1,
+      startTime: startTime,
+      endTime: endTime,
+      text: groupText
+    });
+
+    currentIndex = endIndex;
+  }
+
+  // Si il reste des sous-titres non distribués, les ajouter au dernier groupe
+  if (currentIndex < adjustedEntries.length && selected.length > 0) {
+    const lastGroup = selected[selected.length - 1];
+    const remainingSubs = adjustedEntries.slice(currentIndex);
+    const remainingText = remainingSubs.map((s) => s.text.trim()).join(' ');
+
+    // Enlever l'ellipse existante si présente
+    if (lastGroup.text.endsWith('…')) {
+      lastGroup.text = lastGroup.text.slice(0, -1).trim();
     }
 
-    const mergedText = textParts.join(' ').trim();
-
-    // Ne créer une entrée que si on a du texte (pas juste du contexte accumulé)
-    if (mergedText || !accumulatedQuoteContext) {
-      selected.push({
-        index: i + 1,
-        startTime: group[0].startTime,
-        endTime: group[group.length - 1].endTime,
-        text: mergedText
-      });
-    }
+    lastGroup.text += ' ' + remainingText;
+    lastGroup.endTime = remainingSubs[remainingSubs.length - 1].endTime;
   }
 
   return selected;

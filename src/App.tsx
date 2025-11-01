@@ -10,6 +10,25 @@ import './App.css';
 
 type AppState = 'upload' | 'result';
 
+// Charger les réglages depuis localStorage
+const loadSettings = (): Partial<PrintOptions> => {
+  try {
+    const saved = localStorage.getItem('cineRomanSettings');
+    return saved ? JSON.parse(saved) : {};
+  } catch {
+    return {};
+  }
+};
+
+// Sauvegarder les réglages dans localStorage
+const saveSettings = (settings: PrintOptions) => {
+  try {
+    localStorage.setItem('cineRomanSettings', JSON.stringify(settings));
+  } catch {
+    // Ignore errors
+  }
+};
+
 function App() {
   const [state, setState] = useState<AppState>('upload');
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -19,13 +38,22 @@ function App() {
   const [captureCount, setCaptureCount] = useState(30);
   const [timeOffset, setTimeOffset] = useState(0);
   const [smoothPhrases, setSmoothPhrases] = useState(true);
+
+  // Charger les réglages sauvegardés ou utiliser les valeurs par défaut
+  const savedSettings = loadSettings();
   const [printOptions, setPrintOptions] = useState<PrintOptions>({
     orientation: 'portrait',
-    columns: 3,
-    showTimecodes: true,
-    subtitleFontSize: 8,
-    pageFormat: 'A4'
+    columns: savedSettings.columns ?? 3,
+    showTimecodes: savedSettings.showTimecodes ?? false,
+    showPagination: savedSettings.showPagination ?? false,
+    subtitleFontSize: savedSettings.subtitleFontSize ?? 8,
+    pageFormat: savedSettings.pageFormat ?? 'A4'
   });
+
+  // Sauvegarder les réglages quand ils changent
+  useEffect(() => {
+    saveSettings(printOptions);
+  }, [printOptions]);
 
   const { frames, isProcessing, captureFrames, reset } = useFrameCapture();
 
@@ -50,8 +78,10 @@ function App() {
       !isParsingSubtitles &&
       state === 'upload'
     ) {
-      // Initialiser captureCount basé sur le nombre de sous-titres
-      setCaptureCount(Math.min(30, subtitles.length));
+      // Initialiser captureCount au maximum (nombre de sous-titres)
+      setCaptureCount(subtitles.length);
+      // Remettre le décalage à zéro
+      setTimeOffset(0);
       setState('result');
     }
   }, [videoFile, subtitleFile, subtitles, isParsingSubtitles, state]);

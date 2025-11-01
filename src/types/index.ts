@@ -27,6 +27,7 @@ export interface PrintOptions {
   orientation: 'portrait' | 'landscape';
   columns: number;
   showTimecodes: boolean;
+  showPagination: boolean;
   subtitleFontSize: number; // en pt
   pageFormat: 'A3' | 'A4' | 'A5' | 'letter' | 'legal' | 'tabloid';
   captureCount?: number; // nombre de captures souhaité
