@@ -40,7 +40,7 @@ dev-dist
 *.f4v
 *.m2ts
 *.mts
-*.ts
+test/**/*.ts
 *.vob
 *.ogv
 *.divx
