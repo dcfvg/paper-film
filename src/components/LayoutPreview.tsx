@@ -289,7 +289,10 @@ export default function LayoutPreview({
                         )}
                         <div 
                           className="preview-subtitle"
-                          style={{ fontSize: `${printOptions.subtitleFontSize * 0.5}pt` }}
+                          style={{
+                            fontSize: `${printOptions.subtitleFontSize * 0.5}pt`,
+                            textAlign: printOptions.subtitleAlignment
+                          }}
                         >
                           {frame ? frame.subtitle : 'Texte du sous-titre...'}
                         </div>

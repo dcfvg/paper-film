@@ -151,7 +151,10 @@ export function PreviewPanel({
                 )}
                 <div
                   className="capture-text"
-                  style={{ fontSize: `${printOptions.subtitleFontSize}pt` }}
+                  style={{
+                    fontSize: `${printOptions.subtitleFontSize}pt`,
+                    textAlign: printOptions.subtitleAlignment
+                  }}
                 >
                   {frame.subtitle}
                 </div>

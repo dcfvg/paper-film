@@ -29,6 +29,7 @@ export interface PrintOptions {
   showTimecodes: boolean;
   showPagination: boolean;
   subtitleFontSize: number; // en pt
+  subtitleAlignment: 'left' | 'center' | 'right';
   pageFormat: 'A3' | 'A4' | 'A5' | 'letter' | 'legal' | 'tabloid';
   captureCount?: number; // nombre de captures souhaité
   timeOffset?: number; // décalage en millisecondes

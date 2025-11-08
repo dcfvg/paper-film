@@ -261,7 +261,7 @@ export function selectSubtitles(
   smoothPhrases: boolean = true,
   timeOffset: number = 0
 ): SubtitleEntry[] {
-  if (entries.length === 0) return [];
+  if (entries.length === 0 || count <= 0) return [];
 
   // Appliquer le décalage temporel (en secondes)
   const adjustedEntries =
@@ -279,8 +279,8 @@ export function selectSubtitles(
         })
       : entries;
 
-  // Si on demande autant ou plus de captures que de sous-titres
-  if (count >= adjustedEntries.length) {
+  // Mode direct : nombre de captures >= nombre de sous-titres et pas de fluidité
+  if (!smoothPhrases && count >= adjustedEntries.length) {
     return adjustedEntries;
   }
 

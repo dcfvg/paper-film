@@ -218,7 +218,10 @@ export default function ContactSheet({
                   {formatTimestamp(frame.timestamp)}
                 </div>
               )}
-              <div className="frame-subtitle">
+              <div
+                className="frame-subtitle"
+                style={{ textAlign: printOptions.subtitleAlignment }}
+              >
                 {frame.subtitle}
               </div>
             </div>

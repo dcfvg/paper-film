@@ -113,6 +113,64 @@
   justify-content: center;
 }
 
+.align-controls {
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.subtitle-align-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.subtitle-align-buttons {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.subtitle-align-button {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 5px;
+  padding: 0.3rem;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 30%;
+  min-width: 42px;
+}
+
+.subtitle-align-icon {
+  display: flex;
+}
+
+.subtitle-align-icon svg {
+  stroke: currentColor;
+}
+
+.subtitle-align-button svg {
+  pointer-events: none;
+}
+
+.subtitle-align-button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.subtitle-align-button.active {
+  background: white;
+  color: #4b3ca1;
+  border-color: white;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
 .checkbox-label {
   display: flex;
   align-items: center;

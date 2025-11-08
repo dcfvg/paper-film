@@ -59,6 +59,7 @@ function App() {
     showTimecodes: savedSettings.showTimecodes ?? false,
     showPagination: savedSettings.showPagination ?? false,
     subtitleFontSize: savedSettings.subtitleFontSize ?? 8,
+    subtitleAlignment: savedSettings.subtitleAlignment ?? 'left',
     pageFormat: savedSettings.pageFormat ?? 'A4'
   });
 
@@ -77,16 +78,27 @@ function App() {
     return selectSubtitles(subtitles, captureCount, effectiveSmooth, timeOffset);
   }, [subtitles, subtitlesCount, captureCount, effectiveSmooth, timeOffset]);
 
+  const plannedLength = plannedSubtitles.length;
+
+  // Garder la valeur du slider alignée avec le nombre réel de captures générées en mode fluide
+  useEffect(() => {
+    if (!effectiveSmooth) return;
+    if (plannedLength === 0) return;
+    if (plannedLength !== captureCount) {
+      setCaptureCount(plannedLength);
+    }
+  }, [effectiveSmooth, plannedLength, captureCount]);
+
   // Debounce timer for auto-generation
   useEffect(() => {
-    if (state !== 'result' || !videoFile || plannedSubtitles.length === 0) return;
+    if (state !== 'result' || !videoFile || plannedLength === 0) return;
 
     const timer = setTimeout(() => {
       captureFrames(videoFile, plannedSubtitles);
     }, 500); // 500ms debounce
 
     return () => clearTimeout(timer);
-  }, [plannedSubtitles, videoFile, state, captureFrames]);
+  }, [plannedSubtitles, plannedLength, videoFile, state, captureFrames]);
 
   // Effet pour vérifier si on peut passer à la configuration
   useEffect(() => {
