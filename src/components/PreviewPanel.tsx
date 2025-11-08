@@ -1,16 +1,11 @@
 import { useRef, useState } from 'react';
-import type { CapturedFrame, PrintOptions, SubtitleEntry } from '../types';
-import { selectSubtitles } from '../utils/subtitleParser';
+import type { CapturedFrame, PrintOptions } from '../types';
 import './PreviewPanel.css';
 
 interface PreviewPanelProps {
   frames: CapturedFrame[];
   printOptions: PrintOptions;
   isProcessing: boolean;
-  timeOffset: number; // en secondes
-  allSubtitles: SubtitleEntry[]; // Pour retrouver les sous-titres décalés
-  smoothPhrases: boolean; // Pour la répartition harmonieuse
-  captureCount: number; // Pour recalculer la sélection
   videoFileName: string; // Nom du fichier vidéo
 }
 
@@ -18,76 +13,11 @@ export function PreviewPanel({
   frames,
   printOptions,
   isProcessing,
-  timeOffset,
-  allSubtitles,
-  smoothPhrases,
-  captureCount,
   videoFileName
 }: PreviewPanelProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [customTitle, setCustomTitle] = useState(videoFileName);
   const [showTitle, setShowTitle] = useState(true);
-
-  // Recalculer la sélection des sous-titres avec smoothPhrases et timeOffset
-  // Cela NE génère PAS de nouvelles images, juste répartit le texte différemment
-  const selectedSubtitles = selectSubtitles(allSubtitles, captureCount, smoothPhrases, 0);
-
-  // Trouve le sous-titre qui correspond à un timestamp donné (avec offset)
-  // Utilise selectedSubtitles pour la répartition harmonieuse
-  const findSubtitleForTimestamp = (frameIndex: number): string => {
-    if (!smoothPhrases && captureCount >= allSubtitles.length) {
-      // Mode sans texte fluide ET plus de captures que de sous-titres :
-      // afficher TOUS les sous-titres correspondant au timestamp de l'image
-      const frameTime = frames[frameIndex]?.timestamp;
-      if (!frameTime) return '';
-
-      // Trouver tous les sous-titres qui correspondent à ce timestamp
-      const matchingSubtitles = allSubtitles.filter(
-        (sub) => frameTime >= sub.startTime && frameTime <= sub.endTime
-      );
-
-      // S'il y a des correspondances exactes, les utiliser
-      if (matchingSubtitles.length > 0) {
-        return matchingSubtitles.map((s) => s.text.trim()).join(' ');
-      }
-
-      // Sinon, trouver le sous-titre le plus proche
-      const closestSub = allSubtitles.reduce((closest, sub) => {
-        const currentDist = Math.min(
-          Math.abs(sub.startTime - frameTime),
-          Math.abs(sub.endTime - frameTime)
-        );
-        const closestDist = Math.min(
-          Math.abs(closest.startTime - frameTime),
-          Math.abs(closest.endTime - frameTime)
-        );
-        return currentDist < closestDist ? sub : closest;
-      });
-
-      return closestSub?.text || '';
-    }
-
-    // Pour tous les autres cas (texte fluide OU moins de captures que de sous-titres) :
-    // utiliser la distribution calculée
-    if (frameIndex < selectedSubtitles.length) {
-      const baseSubtitle = selectedSubtitles[frameIndex];
-
-      // Si timeOffset === 0, utiliser directement le sous-titre calculé
-      if (timeOffset === 0) {
-        return baseSubtitle.text;
-      }
-
-      // Sinon, chercher avec le décalage temporel
-      const adjustedTime = frames[frameIndex]?.timestamp + timeOffset;
-      const subtitle = allSubtitles.find(
-        (sub) => adjustedTime >= sub.startTime && adjustedTime <= sub.endTime
-      );
-
-      return subtitle?.text || ''; // Peut être vide si décalage important
-    }
-
-    return '';
-  };
 
   // Format timestamp for display
   const formatTimestamp = (seconds: number): string => {
@@ -223,7 +153,7 @@ export function PreviewPanel({
                   className="capture-text"
                   style={{ fontSize: `${printOptions.subtitleFontSize}pt` }}
                 >
-                  {findSubtitleForTimestamp(frameIndex)}
+                  {frame.subtitle}
                 </div>
               </div>
             </div>

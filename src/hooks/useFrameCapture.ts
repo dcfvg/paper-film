@@ -2,6 +2,18 @@ import { useState, useCallback } from 'react';
 import type { SubtitleEntry, CapturedFrame } from '../types';
 import { captureVideoFrame, loadVideo } from '../utils/videoCapture';
 
+const getCaptureTimestamp = (subtitle: SubtitleEntry): number => {
+  const duration = subtitle.endTime - subtitle.startTime;
+  const baseTime = subtitle.startTime;
+
+  if (!Number.isFinite(duration) || duration <= 0) {
+    return Math.max(0, baseTime);
+  }
+
+  const midpoint = baseTime + duration / 2;
+  return midpoint < 0 ? 0 : midpoint;
+};
+
 interface UseFrameCaptureResult {
   frames: CapturedFrame[];
   isProcessing: boolean;
@@ -21,9 +33,9 @@ export function useFrameCapture(): UseFrameCaptureResult {
     
     // Initialiser la grille avec des placeholders
     const initialFrames: CapturedFrame[] = subtitles.map(subtitle => ({
-      timestamp: subtitle.startTime,
+      timestamp: getCaptureTimestamp(subtitle),
       imageUrl: null,
-      subtitle: subtitle.text,
+      subtitle: subtitle.text.trim(),
       isLoading: true
     }));
     
@@ -36,9 +48,10 @@ export function useFrameCapture(): UseFrameCaptureResult {
       // Capturer les frames séquentiellement pour garantir la bonne position
       for (let index = 0; index < subtitles.length; index++) {
         const subtitle = subtitles[index];
+        const captureTimestamp = getCaptureTimestamp(subtitle);
         
         try {
-          const imageUrl = await captureVideoFrame(video, subtitle.startTime);
+          const imageUrl = await captureVideoFrame(video, captureTimestamp);
           
           // Mettre à jour la frame individuellement
           setFrames(prevFrames => {
@@ -54,7 +67,7 @@ export function useFrameCapture(): UseFrameCaptureResult {
           // Mettre à jour la progression
           setProgress(((index + 1) / subtitles.length) * 100);
         } catch (error) {
-          console.error(`Error capturing frame at ${subtitle.startTime}:`, error);
+          console.error(`Error capturing frame at ${captureTimestamp}:`, error);
           
           setFrames(prevFrames => {
             const newFrames = [...prevFrames];

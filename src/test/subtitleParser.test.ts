@@ -55,5 +55,38 @@ This is a test subtitle.`;
       expect(selected).toHaveLength(10);
       expect(selected[0].index).toBe(1);
     });
+
+    it('adds ellipses when text is split across captures', () => {
+      const subtitles = [
+        { index: 1, startTime: 0, endTime: 1, text: 'Je voulais te dire' },
+        { index: 2, startTime: 2, endTime: 3, text: 'que tout ira bien' },
+        { index: 3, startTime: 4, endTime: 5, text: 'mais il faudra du temps' },
+        { index: 4, startTime: 6, endTime: 7, text: 'pour y arriver' }
+      ];
+
+      const selected = selectSubtitles(subtitles, 2, true, 0);
+
+      expect(selected).toHaveLength(2);
+      expect(selected[0].text.endsWith('…')).toBe(true);
+      expect(selected[1].text.startsWith('…')).toBe(true);
+      expect(selected.map((s) => s.text.replace(/…/g, '').trim()).join(' ')).toBe(
+        subtitles.map((s) => s.text).join(' ')
+      );
+    });
+
+    it('keeps boundaries clean when a sentence ends exactly at the cut', () => {
+      const subtitles = [
+        { index: 1, startTime: 0, endTime: 1, text: 'Bonjour.' },
+        { index: 2, startTime: 2, endTime: 3, text: 'Comment ça va ?' },
+        { index: 3, startTime: 4, endTime: 5, text: 'Très bien.' },
+        { index: 4, startTime: 6, endTime: 7, text: 'Merci.' }
+      ];
+
+      const selected = selectSubtitles(subtitles, 2, true, 0);
+
+      expect(selected).toHaveLength(2);
+      expect(selected.every((s) => !s.text.includes('…'))).toBe(true);
+      expect(selected.every((s) => s.text.trim().length > 0)).toBe(true);
+    });
   });
 });

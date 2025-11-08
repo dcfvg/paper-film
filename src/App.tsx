@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import FileDropzone from './components/FileDropzone';
 import { SplitView } from './components/SplitView';
 import { ConfigPanel } from './components/ConfigPanel';
@@ -39,6 +39,18 @@ function App() {
   const [timeOffset, setTimeOffset] = useState(0);
   const [smoothPhrases, setSmoothPhrases] = useState(true);
 
+  const subtitlesCount = subtitles.length;
+  const isSmoothForced = subtitlesCount > 0 && captureCount < subtitlesCount;
+
+  // Forcer l'option texte fluide quand on a moins de captures que de sous-titres
+  useEffect(() => {
+    if (isSmoothForced && !smoothPhrases) {
+      setSmoothPhrases(true);
+    }
+  }, [isSmoothForced, smoothPhrases]);
+
+  const effectiveSmooth = isSmoothForced ? true : smoothPhrases;
+
   // Charger les réglages sauvegardés ou utiliser les valeurs par défaut
   const savedSettings = loadSettings();
   const [printOptions, setPrintOptions] = useState<PrintOptions>({
@@ -57,17 +69,24 @@ function App() {
 
   const { frames, isProcessing, captureFrames, reset } = useFrameCapture();
 
+  const plannedSubtitles = useMemo(() => {
+    if (subtitlesCount === 0) {
+      return [] as SubtitleEntry[];
+    }
+
+    return selectSubtitles(subtitles, captureCount, effectiveSmooth, timeOffset);
+  }, [subtitles, subtitlesCount, captureCount, effectiveSmooth, timeOffset]);
+
   // Debounce timer for auto-generation
   useEffect(() => {
-    if (state !== 'result' || !videoFile || subtitles.length === 0) return;
+    if (state !== 'result' || !videoFile || plannedSubtitles.length === 0) return;
 
     const timer = setTimeout(() => {
-      const selected = selectSubtitles(subtitles, captureCount, false, 0); // smoothPhrases n'affecte que l'affichage, pas la capture
-      captureFrames(videoFile, selected);
+      captureFrames(videoFile, plannedSubtitles);
     }, 500); // 500ms debounce
 
     return () => clearTimeout(timer);
-  }, [captureCount, videoFile, subtitles, state, captureFrames]); // smoothPhrases et timeOffset retirés
+  }, [plannedSubtitles, videoFile, state, captureFrames]);
 
   // Effet pour vérifier si on peut passer à la configuration
   useEffect(() => {
@@ -138,6 +157,7 @@ function App() {
               onTimeOffsetChange={setTimeOffset}
               smoothPhrases={smoothPhrases}
               onSmoothPhrasesChange={setSmoothPhrases}
+              isSmoothForced={isSmoothForced}
               printOptions={printOptions}
               onPrintOptionsChange={setPrintOptions}
               onBack={handleCancel}
@@ -148,10 +168,6 @@ function App() {
               frames={frames}
               printOptions={printOptions}
               isProcessing={isProcessing}
-              timeOffset={timeOffset}
-              allSubtitles={subtitles}
-              smoothPhrases={smoothPhrases}
-              captureCount={captureCount}
               videoFileName={videoFile.name}
             />
           }

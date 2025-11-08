@@ -13,6 +13,7 @@ interface ConfigPanelProps {
   onTimeOffsetChange: (offset: number) => void;
   smoothPhrases: boolean;
   onSmoothPhrasesChange: (enabled: boolean) => void;
+  isSmoothForced?: boolean;
 
   // Print options
   printOptions: PrintOptionsType;
@@ -30,6 +31,7 @@ export function ConfigPanel({
   onTimeOffsetChange,
   smoothPhrases,
   onSmoothPhrasesChange,
+  isSmoothForced = false,
   printOptions,
   onPrintOptionsChange,
   onBack
@@ -100,8 +102,16 @@ export function ConfigPanel({
               checked={smoothPhrases}
               onChange={(e) => onSmoothPhrasesChange(e.target.checked)}
               className="option-checkbox"
+              disabled={isSmoothForced}
+              title={
+                isSmoothForced
+                  ? 'Texte fluide obligatoire lorsque le nombre de captures est inférieur au nombre de sous-titres'
+                  : undefined
+              }
             />
-            <span>Texte fluide</span>
+            <span>
+              Texte fluide {isSmoothForced && <em>(obligatoire)</em>}
+            </span>
           </label>
         </div>
       </div>

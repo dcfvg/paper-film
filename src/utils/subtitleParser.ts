@@ -130,7 +130,7 @@ export async function parseSubtitleFile(file: File): Promise<SubtitleEntry[]> {
  */
 function endsWithFinalPunctuation(text: string): boolean {
   const trimmed = text.trim();
-  return /[.!?;:]$/.test(trimmed);
+  return /[.!?;:…]$/.test(trimmed);
 }
 
 /**
@@ -191,6 +191,66 @@ function isContinuation(nextSubtitleText: string): boolean {
   return continuationWords.some((word) => lowerTrimmed.startsWith(word));
 }
 
+function startsNewSentence(text: string): boolean {
+  if (!text) return false;
+
+  const trimmed = text.trim();
+  if (!trimmed) return false;
+
+  if (trimmed.startsWith('…')) {
+    return false;
+  }
+
+  if (trimmed.startsWith('-')) {
+    const afterDash = trimmed.slice(1).trim();
+    if (!afterDash) return false;
+    const firstCharAfterDash = afterDash[0];
+    const isLetter = firstCharAfterDash.toLowerCase() !== firstCharAfterDash.toUpperCase();
+    return isLetter ? firstCharAfterDash === firstCharAfterDash.toUpperCase() : true;
+  }
+
+  const firstChar = trimmed[0];
+  if (/^[«“"(\[]/.test(firstChar)) {
+    return true;
+  }
+
+  const isLetter = firstChar.toLowerCase() !== firstChar.toUpperCase();
+  if (isLetter) {
+    return firstChar === firstChar.toUpperCase();
+  }
+
+  return true;
+}
+
+function isSentenceBoundary(previousText: string, nextSubtitleText?: string): boolean {
+  if (!nextSubtitleText) return true;
+
+  const trimmedPrev = previousText.trim();
+  const trimmedNext = nextSubtitleText.trim();
+
+  if (!trimmedPrev || !trimmedNext) {
+    return true;
+  }
+
+  if (trimmedPrev.endsWith('…')) {
+    return false;
+  }
+
+  if (!endsWithFinalPunctuation(trimmedPrev)) {
+    return false;
+  }
+
+  if (hasOpenQuote(trimmedPrev)) {
+    return false;
+  }
+
+  if (isContinuation(trimmedNext)) {
+    return false;
+  }
+
+  return startsNewSentence(trimmedNext);
+}
+
 /**
  * Sélectionne un nombre donné de sous-titres espacés uniformément
  * Si le nombre demandé est inférieur au nombre total, fusionne les textes intelligemment
@@ -203,14 +263,20 @@ export function selectSubtitles(
 ): SubtitleEntry[] {
   if (entries.length === 0) return [];
 
-  // Appliquer le décalage temporel
+  // Appliquer le décalage temporel (en secondes)
   const adjustedEntries =
     timeOffset !== 0
-      ? entries.map((entry) => ({
-          ...entry,
-          startTime: entry.startTime + timeOffset / 1000,
-          endTime: entry.endTime + timeOffset / 1000
-        }))
+      ? entries.map((entry) => {
+          const shiftedStart = entry.startTime + timeOffset;
+          const shiftedEnd = entry.endTime + timeOffset;
+          const startTime = Math.max(0, shiftedStart);
+          const endTime = Math.max(startTime, shiftedEnd);
+          return {
+            ...entry,
+            startTime,
+            endTime
+          };
+        })
       : entries;
 
   // Si on demande autant ou plus de captures que de sous-titres
@@ -246,108 +312,97 @@ export function selectSubtitles(
 
   // Mode smoothPhrases : distribuer TOUT le texte en évitant de couper phrases/citations
   const selected: SubtitleEntry[] = [];
-  const itemsPerGroup = adjustedEntries.length / count;
   let currentIndex = 0;
+  let shouldPrependEllipsis = false;
+
+  const totalChars = adjustedEntries.reduce((sum, entry) => sum + entry.text.trim().length, 0);
+  const safeTotalChars = totalChars > 0 ? totalChars : adjustedEntries.length;
+  let consumedChars = 0;
 
   for (let groupNum = 0; groupNum < count; groupNum++) {
-    const targetEndIndex = Math.floor((groupNum + 1) * itemsPerGroup);
+    if (currentIndex >= adjustedEntries.length) {
+      break;
+    }
+
     const isLastGroup = groupNum === count - 1;
+    const groupsLeft = count - groupNum;
+    const remainingChars = Math.max(safeTotalChars - consumedChars, 0);
+    const targetCharsForGroup = isLastGroup
+      ? remainingChars
+      : Math.max(1, remainingChars / groupsLeft);
 
-    // Pour le dernier groupe, prendre tout ce qui reste
-    const maxEndIndex = isLastGroup ? adjustedEntries.length : targetEndIndex;
-
-    if (currentIndex >= adjustedEntries.length) break;
-
-    // Collecter les sous-titres pour ce groupe
-    let groupText = '';
+    const groupParts: string[] = [];
     const startTime = adjustedEntries[currentIndex].startTime;
     let endTime = adjustedEntries[currentIndex].endTime;
     let endIndex = currentIndex;
-    let textWasCut = false;
+    let groupChars = 0;
 
-    // TOUJOURS prendre au moins un sous-titre pour éviter les groupes vides
-    const minEndIndex = currentIndex + 1;
-
-    // Ajouter les sous-titres jusqu'à la cible
-    while (endIndex < maxEndIndex && endIndex < adjustedEntries.length) {
+    while (endIndex < adjustedEntries.length) {
       const sub = adjustedEntries[endIndex];
-      groupText += (groupText ? ' ' : '') + sub.text.trim();
+      const cleanText = sub.text.trim();
+      groupParts.push(cleanText);
+      groupChars += Math.max(cleanText.length, 1);
       endTime = sub.endTime;
       endIndex++;
 
-      // Si on a atteint la cible (et pris au moins un sous-titre), vérifier si on peut couper
-      if (endIndex >= targetEndIndex && endIndex >= minEndIndex && !isLastGroup) {
-        const hasOpenCitation = hasOpenQuote(groupText);
-        const endsWithPunctuation = endsWithFinalPunctuation(groupText);
-        const remainingEntries = adjustedEntries.slice(endIndex);
-        const remainingText = remainingEntries.map((s) => s.text).join(' ');
-        const isRemainingShort = remainingText.trim().length < 50;
-
-        // Vérifier si le prochain sous-titre est une continuation
-        const nextIsContinuation =
-          endIndex < adjustedEntries.length && isContinuation(adjustedEntries[endIndex].text);
-
-        // Continuer si : citation ouverte, pas de ponctuation, reste trop court, OU le prochain continue
-        if (hasOpenCitation || !endsWithPunctuation || isRemainingShort || nextIsContinuation) {
-          // Regarder jusqu'à 3 sous-titres de plus
-          const lookAheadLimit = Math.min(endIndex + 3, adjustedEntries.length);
-          let shouldContinue = true;
-
-          while (endIndex < lookAheadLimit && shouldContinue) {
-            const nextSub = adjustedEntries[endIndex];
-            groupText += ' ' + nextSub.text.trim();
-            endTime = nextSub.endTime;
-            endIndex++;
-
-            // Vérifier si on peut couper maintenant
-            const hasOpenCitationNow = hasOpenQuote(groupText);
-            const endsWithPunctuationNow = endsWithFinalPunctuation(groupText);
-            const nextIsContinuationNow =
-              endIndex < adjustedEntries.length && isContinuation(adjustedEntries[endIndex].text);
-
-            // Couper seulement si: pas de citation ouverte, ponctuation finale, ET le prochain ne continue pas
-            if (!hasOpenCitationNow && endsWithPunctuationNow && !nextIsContinuationNow) {
-              shouldContinue = false;
-            }
-          }
+      if (isLastGroup) {
+        if (endIndex >= adjustedEntries.length) {
+          break;
         }
+        continue;
+      }
 
-        // Si on a coupé et qu'il reste du texte, marquer comme coupé
-        if (endIndex < adjustedEntries.length) {
-          textWasCut = true;
-        }
+      const entriesRemaining = adjustedEntries.length - endIndex;
+      const groupsRemaining = count - groupNum - 1;
+
+      if (entriesRemaining <= groupsRemaining) {
+        break;
+      }
+
+      const currentGroupText = groupParts.join(' ').trim();
+      const nextEntry = adjustedEntries[endIndex];
+      const boundaryAfterThis = nextEntry
+        ? isSentenceBoundary(currentGroupText, nextEntry.text)
+        : true;
+
+      const hasReachedTarget = groupChars >= targetCharsForGroup;
+      const significantlyOverTarget = groupChars >= targetCharsForGroup * 1.2;
+
+      if (boundaryAfterThis && hasReachedTarget) {
+        break;
+      }
+
+      if (!boundaryAfterThis && significantlyOverTarget) {
         break;
       }
     }
 
-    // Ajouter des ellipses si le texte a été coupé et qu'il reste du contenu
-    if (textWasCut && endIndex < adjustedEntries.length) {
-      const remainingText = adjustedEntries
-        .slice(endIndex)
-        .map((s) => s.text.trim())
-        .join(' ');
-      // Ajouter des ellipses si :
-      // 1. Le texte ne se termine pas par une ponctuation finale, OU
-      // 2. Le texte se termine par une ponctuation mais le prochain sous-titre continue la narration
-      if (!endsWithFinalPunctuation(groupText)) {
-        groupText += '…';
-      } else if (
-        remainingText.trim().length > 0 &&
-        isContinuation(adjustedEntries[endIndex].text)
-      ) {
-        // Si la phrase suivante continue, ajouter des ellipses même après un point
-        groupText += ' …';
-      }
+    consumedChars += groupChars;
+
+    const rawGroupText = groupParts.join(' ').trim();
+    const nextEntry = adjustedEntries[endIndex];
+    const textWasCut =
+      !isLastGroup && Boolean(nextEntry) && !isSentenceBoundary(rawGroupText, nextEntry?.text);
+
+    let groupText = rawGroupText;
+
+    if (shouldPrependEllipsis && groupText) {
+      groupText = `… ${groupText}`;
+    }
+
+    if (textWasCut && groupText) {
+      groupText = `${groupText.trimEnd()}…`;
     }
 
     selected.push({
       index: groupNum + 1,
-      startTime: startTime,
-      endTime: endTime,
+      startTime,
+      endTime,
       text: groupText
     });
 
     currentIndex = endIndex;
+    shouldPrependEllipsis = textWasCut;
   }
 
   // Si il reste des sous-titres non distribués, les ajouter au dernier groupe
@@ -356,13 +411,13 @@ export function selectSubtitles(
     const remainingSubs = adjustedEntries.slice(currentIndex);
     const remainingText = remainingSubs.map((s) => s.text.trim()).join(' ');
 
-    // Enlever l'ellipse existante si présente
     if (lastGroup.text.endsWith('…')) {
       lastGroup.text = lastGroup.text.slice(0, -1).trim();
     }
 
-    lastGroup.text += ' ' + remainingText;
+    lastGroup.text = `${lastGroup.text} ${remainingText}`.trim();
     lastGroup.endTime = remainingSubs[remainingSubs.length - 1].endTime;
+    shouldPrependEllipsis = false;
   }
 
   return selected;
