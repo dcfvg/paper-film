@@ -72,22 +72,22 @@ export default function ContactSheet({
         <div className="header-compact">
           <div className="header-top">
             <button onClick={onBack} className="btn btn-secondary btn-sm">
-              ← Retour
+              ← Back
             </button>
             <h2 className="header-title">{videoFileName}</h2>
             <button onClick={handlePrint} className="btn btn-primary btn-sm">
-              🖨️ Imprimer
+              🖨️ Print
             </button>
           </div>
 
           <div className="header-main">
             <div className="header-left">
               <div className="controls-section">
-                <h3 className="section-title">⚙️ Configuration</h3>
+                <h3 className="section-title">⚙️ Setup</h3>
                 
                 <div className="control-row">
                   <label htmlFor="frame-count" className="control-label">
-                    Captures: <strong>{captureCount}</strong>
+                    Frames: <strong>{captureCount}</strong>
                   </label>
                   <input
                     id="frame-count"
@@ -107,7 +107,7 @@ export default function ContactSheet({
 
                 <div className="control-row">
                   <label htmlFor="time-offset" className="control-label">
-                    Décalage: <strong>{timeOffset > 0 ? '+' : ''}{timeOffset}ms</strong>
+                    Offset: <strong>{timeOffset > 0 ? '+' : ''}{timeOffset}ms</strong>
                   </label>
                   <input
                     id="time-offset"
@@ -135,7 +135,7 @@ export default function ContactSheet({
                       disabled={isProcessing || captureCount === subtitles.length}
                       className="control-checkbox"
                     />
-                    <span>Fluidifier les phrases</span>
+                    <span>Smooth text</span>
                   </label>
                 </div>
 
@@ -149,7 +149,7 @@ export default function ContactSheet({
                     </div>
                   ) : (
                     <button onClick={onGenerate} className="btn btn-primary btn-block">
-                      🎬 Générer {captureCount} captures
+                      🎬 Generate {captureCount} frames
                     </button>
                   )}
                 </div>
@@ -191,10 +191,10 @@ export default function ContactSheet({
             <div key={index} className="frame-card">
             <div className="frame-image-container">
               {frame.isLoading ? (
-                <div className="frame-loading">
-                  <div className="spinner"></div>
-                  <p>Capture en cours...</p>
-                </div>
+                  <div className="frame-loading">
+                    <div className="spinner"></div>
+                    <p>Capturing frame…</p>
+                  </div>
               ) : frame.error ? (
                 <div className="frame-error">
                   <p>❌ {frame.error}</p>
@@ -207,7 +207,7 @@ export default function ContactSheet({
                 />
               ) : (
                 <div className="frame-placeholder">
-                  <p>En attente...</p>
+                  <p>Waiting…</p>
                 </div>
               )}
             </div>
@@ -231,7 +231,7 @@ export default function ContactSheet({
 
         <div className="contact-sheet-footer">
           <p>
-            {frames.filter(f => !f.isLoading).length} / {frames.length} captures prêtes
+            {frames.filter(f => !f.isLoading).length} / {frames.length} frames ready
           </p>
         </div>
       </div>

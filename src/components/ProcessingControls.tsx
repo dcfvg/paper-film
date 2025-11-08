@@ -30,7 +30,7 @@ export default function ProcessingControls({
   smoothPhrases,
   onSmoothPhrasesChange
 }: ProcessingControlsProps) {
-  // Désactiver automatiquement smoothPhrases si frameCount === subtitles.length
+  // Automatically disable smooth mode when there are enough frames
   useEffect(() => {
     if (captureCount === subtitles.length) {
       onSmoothPhrasesChange(false);
@@ -45,11 +45,11 @@ export default function ProcessingControls({
   return (
     <div className="processing-controls">
       <div className="controls-content">
-        <h2>Configuration de la planche</h2>
+        <h2>Contact sheet settings</h2>
         
         <div className="control-group">
           <label htmlFor="frame-count">
-            Nombre de captures: <strong>{captureCount}</strong>
+            Frames: <strong>{captureCount}</strong>
           </label>
           <input
             id="frame-count"
@@ -69,7 +69,7 @@ export default function ProcessingControls({
 
         <div className="control-group">
           <label htmlFor="time-offset">
-            Décalage temporel: <strong>{timeOffset > 0 ? '+' : ''}{timeOffset} ms</strong>
+            Time offset: <strong>{timeOffset > 0 ? '+' : ''}{timeOffset} ms</strong>
           </label>
           <input
             id="time-offset"
@@ -88,7 +88,7 @@ export default function ProcessingControls({
             <span>+5s</span>
           </div>
           <div className="control-hint">
-            Ajustez si les sous-titres ne sont pas synchronisés avec la vidéo
+            Adjust if subtitles drift from the video
           </div>
         </div>
 
@@ -102,18 +102,18 @@ export default function ProcessingControls({
               className="control-checkbox"
             />
             <span>
-              <strong>Fluidifier les phrases</strong>
-              <small>Évite de couper les citations, questions et phrases courtes</small>
+              <strong>Smooth text</strong>
+              <small>Keeps quotes, questions, and short lines intact</small>
             </span>
           </label>
         </div>
 
         <div className="info-box">
           <p>
-            📊 <strong>{subtitles.length}</strong> sous-titres détectés
+            📊 <strong>{subtitles.length}</strong> subtitles detected
           </p>
           <p>
-            🎬 <strong>{captureCount}</strong> captures seront générées
+            🎬 <strong>{captureCount}</strong> frames will be rendered
           </p>
         </div>
 
@@ -126,7 +126,7 @@ export default function ProcessingControls({
               />
             </div>
             <p className="progress-text">
-              Capture en cours... {Math.round(progress)}%
+              Capturing… {Math.round(progress)}%
             </p>
           </div>
         )}
@@ -135,15 +135,15 @@ export default function ProcessingControls({
           {!isProcessing ? (
             <>
               <button onClick={onCancel} className="btn btn-secondary">
-                Annuler
+                Cancel
               </button>
               <button onClick={handleStart} className="btn btn-primary">
-                Générer la planche
+                Render contact sheet
               </button>
             </>
           ) : (
             <button onClick={onCancel} className="btn btn-secondary">
-              Annuler le traitement
+              Stop rendering
             </button>
           )}
         </div>

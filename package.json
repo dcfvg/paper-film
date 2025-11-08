@@ -1,5 +1,6 @@
 {
-  "name": "cine-roman",
+  "name": "paper-film",
+  "description": "Paper Film turns videos and captions into printable contact sheets.",
   "private": true,
   "version": "0.0.0",
   "type": "module",

@@ -13,7 +13,7 @@ type AppState = 'upload' | 'result';
 // Charger les réglages depuis localStorage
 const loadSettings = (): Partial<PrintOptions> => {
   try {
-    const saved = localStorage.getItem('cineRomanSettings');
+    const saved = localStorage.getItem('paperFilmSettings');
     return saved ? JSON.parse(saved) : {};
   } catch {
     return {};
@@ -23,7 +23,7 @@ const loadSettings = (): Partial<PrintOptions> => {
 // Sauvegarder les réglages dans localStorage
 const saveSettings = (settings: PrintOptions) => {
   try {
-    localStorage.setItem('cineRomanSettings', JSON.stringify(settings));
+    localStorage.setItem('paperFilmSettings', JSON.stringify(settings));
   } catch {
     // Ignore errors
   }
@@ -38,6 +38,8 @@ function App() {
   const [captureCount, setCaptureCount] = useState(30);
   const [timeOffset, setTimeOffset] = useState(0);
   const [smoothPhrases, setSmoothPhrases] = useState(true);
+  const [customTitle, setCustomTitle] = useState('');
+  const [showTitle, setShowTitle] = useState(true);
 
   const subtitlesCount = subtitles.length;
   const isSmoothForced = subtitlesCount > 0 && captureCount < subtitlesCount;
@@ -69,6 +71,15 @@ function App() {
   }, [printOptions]);
 
   const { frames, isProcessing, captureFrames, reset } = useFrameCapture();
+
+  useEffect(() => {
+    if (videoFile) {
+      const baseName = videoFile.name.replace(/\.[^.]+$/, '');
+      setCustomTitle(baseName);
+    } else {
+      setCustomTitle('');
+    }
+  }, [videoFile]);
 
   const plannedSubtitles = useMemo(() => {
     if (subtitlesCount === 0) {
@@ -158,7 +169,7 @@ function App() {
 
       {state === 'result' && videoFile && (
         <SplitView
-          defaultSplit={30}
+          defaultSplit={20}
           minSize={20}
           left={
             <ConfigPanel
@@ -172,6 +183,13 @@ function App() {
               isSmoothForced={isSmoothForced}
               printOptions={printOptions}
               onPrintOptionsChange={setPrintOptions}
+              frames={frames}
+              isProcessing={isProcessing}
+              onPrint={handlePrint}
+              customTitle={customTitle}
+              onTitleChange={setCustomTitle}
+              showTitle={showTitle}
+              onToggleTitle={() => setShowTitle((prev) => !prev)}
               onBack={handleCancel}
             />
           }
@@ -180,7 +198,8 @@ function App() {
               frames={frames}
               printOptions={printOptions}
               isProcessing={isProcessing}
-              videoFileName={videoFile.name}
+              customTitle={customTitle || videoFile.name}
+              showTitle={showTitle}
             />
           }
         />
@@ -190,3 +209,6 @@ function App() {
 }
 
 export default App;
+  const handlePrint = () => {
+    window.print();
+  };

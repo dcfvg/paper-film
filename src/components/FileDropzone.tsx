@@ -36,6 +36,8 @@ export default function FileDropzone({
     multiple: true
   });
 
+  const logoSrc = `${import.meta.env.BASE_URL}paper-film-mark.svg`;
+
   return (
     <div className="dropzone-container">
       <div 
@@ -45,62 +47,68 @@ export default function FileDropzone({
         <input {...getInputProps()} />
         
         <div className="dropzone-content">
-          <svg 
-            className="dropzone-icon" 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" 
-            />
-          </svg>
-          
-          <h1 className="dropzone-title">Ciné-Roman</h1>
-          
-          {isDragActive ? (
-            <p className="dropzone-text">Déposez les fichiers ici...</p>
-          ) : (
-            <>
-              <p className="dropzone-text">
-                Glissez-déposez votre <strong>vidéo</strong> et votre fichier de <strong>sous-titres</strong>
-              </p>
-              <p className="dropzone-subtext">
-                ou cliquez pour sélectionner les fichiers
-              </p>
-            </>
-          )}
-          
+          <div className="dropzone-hero">
+            <div className="dropzone-brand">
+              <img src={logoSrc} className="app-logo large" alt="Paper Film mark" />
+              <h1 className="dropzone-title">Paper Film</h1>
+              <p className="dropzone-tagline">Analog warmth for cinematic subtitles</p>
+            </div>
+
+            <div className="dropzone-callout">
+              <svg
+                className="dropzone-icon"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                />
+              </svg>
+              {isDragActive ? (
+                <p className="dropzone-text">Drop your files right here…</p>
+              ) : (
+                <>
+                  <p className="dropzone-text">
+                    Drag your <strong>video</strong> + <strong>subtitle</strong> files,
+                    or tap anywhere to browse.
+                  </p>
+                  <p className="dropzone-subtext">Paper Film never uploads your media.</p>
+                </>
+              )}
+            </div>
+          </div>
+
           <div className="file-status">
             {videoFile && (
               <div className="file-badge file-badge-success">
-                ✓ Vidéo: {videoFile.name}
+                ✓ Video: {videoFile.name}
               </div>
             )}
             {subtitleFile && (
               <div className="file-badge file-badge-success">
-                ✓ Sous-titres: {subtitleFile.name}
+                ✓ Subtitles: {subtitleFile.name}
               </div>
             )}
           </div>
-          
+
           <div className="dropzone-info">
             <div className="info-section">
-              <h3>Formats vidéo acceptés</h3>
+              <h3>Accepted video formats</h3>
               <p>MP4, AVI, MOV, MKV, WebM, FLV, WMV, M4V</p>
             </div>
             <div className="info-section">
-              <h3>Formats de sous-titres</h3>
+              <h3>Subtitle formats</h3>
               <p>SRT, VTT (WebVTT)</p>
             </div>
             <div className="info-section">
-              <h3>Fonctionnement</h3>
+              <h3>How it works</h3>
               <p>
-                Les captures d'écran sont prises aux moments indiqués par les sous-titres.
-                La planche générée est optimisée pour l'impression.
+                Paper Film captures frames exactly where your subtitles land and arranges
+                them into a tactile contact sheet for print or export.
               </p>
             </div>
           </div>

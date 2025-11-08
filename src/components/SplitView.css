@@ -13,18 +13,23 @@
 }
 
 .split-left {
-  background: #f8f9fa;
-  border-right: 1px solid #e5e7eb;
+  background: rgba(15, 20, 30, 0.3);
+  border-right: 1px solid var(--pf-border);
+  backdrop-filter: blur(18px);
 }
 
 .split-right {
-  background: #ffffff;
+  background: transparent;
+}
+
+.split-panel > * {
+  height: 100%;
 }
 
 .split-divider {
-  width: 8px;
+  width: 10px;
   height: 100%;
-  background: #e5e7eb;
+  background: rgba(255, 255, 255, 0.12);
   cursor: col-resize;
   position: relative;
   flex-shrink: 0;
@@ -35,18 +40,18 @@
 }
 
 .split-divider:hover {
-  background: #cbd5e1;
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .split-view.dragging .split-divider {
-  background: #94a3b8;
+  background: rgba(0, 0, 0, 0.15);
 }
 
 .split-handle {
   width: 2px;
-  height: 40px;
-  background: #64748b;
-  border-radius: 1px;
+  height: 42px;
+  background: rgba(72, 64, 94, 0.4);
+  border-radius: 999px;
   position: relative;
 }
 
@@ -56,8 +61,8 @@
   position: absolute;
   width: 2px;
   height: 40px;
-  background: #64748b;
-  border-radius: 1px;
+  background: rgba(72, 64, 94, 0.4);
+  border-radius: 999px;
 }
 
 .split-handle::before {
@@ -85,7 +90,7 @@
 
   .split-left {
     border-right: none;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   }
 
   .split-handle {

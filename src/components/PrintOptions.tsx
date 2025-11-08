@@ -1,3 +1,4 @@
+import React from 'react';
 import type { PrintOptions } from '../types';
 import './PrintOptions.css';
 
@@ -14,11 +15,11 @@ export default function PrintOptionsComponent({ options, onChange }: PrintOption
   const alignmentOptions: Array<{
     value: PrintOptions['subtitleAlignment'];
     label: string;
-    icon: JSX.Element;
+    icon: React.ReactElement;
   }> = [
     {
       value: 'left',
-      label: 'Aligner à gauche',
+      label: 'Align left',
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
           <line x1="4" y1="6" x2="20" y2="6" stroke="currentColor" strokeWidth="2" />
@@ -29,7 +30,7 @@ export default function PrintOptionsComponent({ options, onChange }: PrintOption
     },
     {
       value: 'center',
-      label: 'Aligner au centre',
+      label: 'Align center',
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
           <line x1="6" y1="6" x2="18" y2="6" stroke="currentColor" strokeWidth="2" />
@@ -40,7 +41,7 @@ export default function PrintOptionsComponent({ options, onChange }: PrintOption
     },
     {
       value: 'right',
-      label: 'Aligner à droite',
+      label: 'Align right',
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
           <line x1="4" y1="6" x2="20" y2="6" stroke="currentColor" strokeWidth="2" />
@@ -55,7 +56,7 @@ export default function PrintOptionsComponent({ options, onChange }: PrintOption
     <div className="options-grid">
       <div className="option-group">
         <label htmlFor="columns">
-          <strong>Colonnes</strong>
+          <strong>Columns</strong>
         </label>
         <div className="option-with-preview">
           <input
@@ -72,7 +73,7 @@ export default function PrintOptionsComponent({ options, onChange }: PrintOption
       </div>{' '}
       <div className="option-group">
         <label htmlFor="subtitleFontSize">
-          <strong>Taille des sous-titres</strong>
+          <strong>Subtitle size</strong>
         </label>
         <div className="option-with-preview">
           <input
@@ -95,12 +96,10 @@ export default function PrintOptionsComponent({ options, onChange }: PrintOption
             onChange={(e) => handleChange('showTimecodes', e.target.checked)}
             className="option-checkbox"
           />
-          <span>Afficher les timecodes</span>
+          <span>Show timecodes</span>
         </label>
-        <div className="subtitle-align-header">
-          <span className="subtitle-align-title">Alignement du texte</span>
-        </div>
-        <div className="subtitle-align-buttons" role="group" aria-label="Alignement des sous-titres">
+        <span className="subtitle-align-title">Subtitle alignment</span>
+        <div className="subtitle-align-buttons" role="group" aria-label="Subtitle alignment">
           {alignmentOptions.map((align) => (
             <button
               key={align.value}

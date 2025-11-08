@@ -175,14 +175,14 @@ export default function LayoutPreview({
   return (
     <div className="layout-preview">
       <div className="layout-preview-header-row">
-        <h3>📋 Aperçu de la mise en page</h3>
+        <h3>Layout preview</h3>
         <div className="layout-stats">
           <div className="stat-item">
-            <span className="stat-label">Captures:</span>
+            <span className="stat-label">Frames:</span>
             <strong className="stat-value">{previewFrames.length || totalFrames}</strong>
           </div>
           <div className="stat-item">
-            <span className="stat-label">Par page:</span>
+            <span className="stat-label">Per page:</span>
             <strong className="stat-value">{framesPerPage}</strong>
           </div>
           <div className="stat-item">
@@ -191,19 +191,19 @@ export default function LayoutPreview({
           </div>
           {timeOffset !== 0 && (
             <div className="stat-item">
-              <span className="stat-label">Décalage:</span>
+            <span className="stat-label">Offset:</span>
               <strong className="stat-value">{timeOffset > 0 ? '+' : ''}{timeOffset}ms</strong>
             </div>
           )}
           {!smoothPhrases && (
             <div className="stat-item">
               <span className="stat-label">Mode:</span>
-              <strong className="stat-value">Simple</strong>
+              <strong className="stat-value">Classic</strong>
             </div>
           )}
           {previewFrames.length > 0 && (
             <div className="stat-item">
-              <span className="stat-label">Rendues:</span>
+              <span className="stat-label">Rendered:</span>
               <strong className="stat-value">{loadedCount}/{previewFrames.length}</strong>
             </div>
           )}
@@ -219,9 +219,9 @@ export default function LayoutPreview({
             />
           </div>
           <div className="render-status">
-            {queuedCount > 0 && <span className="render-queued">⏳ {queuedCount} en attente</span>}
-            {loadingCount > 0 && <span className="render-loading">⚙️ {loadingCount} en cours</span>}
-            {loadedCount === previewFrames.length && <span className="render-complete">✅ Rendu terminé</span>}
+            {queuedCount > 0 && <span className="render-queued">{queuedCount} queued</span>}
+            {loadingCount > 0 && <span className="render-loading">{loadingCount} processing</span>}
+            {loadedCount === previewFrames.length && <span className="render-complete">Render complete</span>}
           </div>
         </div>
       )}
@@ -294,7 +294,7 @@ export default function LayoutPreview({
                             textAlign: printOptions.subtitleAlignment
                           }}
                         >
-                          {frame ? frame.subtitle : 'Texte du sous-titre...'}
+                          {frame ? frame.subtitle : 'Subtitle text…'}
                         </div>
                       </div>
                     </div>
@@ -307,7 +307,7 @@ export default function LayoutPreview({
         
         {totalPages > 3 && (
           <div className="preview-more">
-            + {totalPages - 3} page{totalPages - 3 > 1 ? 's' : ''} supplémentaire{totalPages - 3 > 1 ? 's' : ''}
+            + {totalPages - 3} extra page{totalPages - 3 > 1 ? 's' : ''}
           </div>
         )}
       </div>
