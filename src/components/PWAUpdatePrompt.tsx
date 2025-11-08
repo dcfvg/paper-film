@@ -3,56 +3,58 @@ import './PWAUpdatePrompt.css';
 
 export default function PWAUpdatePrompt() {
   const [showUpdate, setShowUpdate] = useState(false);
-  const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
 
   useEffect(() => {
-    if (!('serviceWorker' in navigator)) return;
-
-    const handleUpdate = (reg: ServiceWorkerRegistration) => {
-      console.log('[PWA] Update available');
-      setRegistration(reg);
+    // Listen for update events from the service worker
+    const handleNeedRefresh = () => {
+      console.log('[PWA] Update prompt shown');
       setShowUpdate(true);
     };
 
-    // Check for updates
-    navigator.serviceWorker.ready.then((reg) => {
-      // Check for updates every hour
-      setInterval(
-        () => {
-          reg.update();
-        },
-        60 * 60 * 1000
-      );
+    // Check if vite-plugin-pwa exposed the event
+    if (window.updateSW) {
+      // The registration callback in main.tsx already calls onNeedRefresh
+      // We just need to listen for it
+      const checkForUpdates = setInterval(() => {
+        if (showUpdate) {
+          clearInterval(checkForUpdates);
+        }
+      }, 1000);
 
-      reg.addEventListener('updatefound', () => {
-        const newWorker = reg.installing;
-        if (!newWorker) return;
+      return () => clearInterval(checkForUpdates);
+    }
 
-        newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            handleUpdate(reg);
-          }
+    // Fallback to manual service worker detection
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then((reg) => {
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          if (!newWorker) return;
+
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              handleNeedRefresh();
+            }
+          });
         });
       });
 
-      // Check immediately
-      reg.update();
-    });
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        console.log('[PWA] Controller changed, reloading page');
+        window.location.reload();
+      });
+    }
+  }, [showUpdate]);
 
-    // Listen for controller change (new service worker activated)
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      console.log('[PWA] Controller changed, reloading page');
-      window.location.reload();
-    });
-  }, []);
-
-  const handleUpdate = () => {
-    if (!registration || !registration.waiting) return;
-
-    // Send message to service worker to skip waiting
-    registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-
+  const handleUpdate = async () => {
     setShowUpdate(false);
+
+    if (window.updateSW) {
+      await window.updateSW(true);
+    } else {
+      // Fallback: reload the page
+      window.location.reload();
+    }
   };
 
   const handleDismiss = () => {

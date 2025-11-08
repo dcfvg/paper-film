@@ -1,8 +1,8 @@
 # 🎞️ Paper Film
 
-**Turn any video and its subtitles into a polished printable contact sheet.**
+**Turn any film or video and its subtitles into a polished, printable contact sheet — a visual storyboard of every line of dialogue.**
 
-Paper Film captures the perfect still for each subtitle, redistributes the dialogue when needed, and lays everything out in a friendly, print‑ready grid. Think of it as a photo novella generator for your edits, research work, or classroom handouts.
+Paper Film finds the exact frame where each subtitle appears, captures a clean still, and lays those frames out in a print‑ready grid that’s easy to read and annotate. Use it to preview edits, build classroom handouts, or turn dialogue-driven moments into tangible, shareable photo‑novellas.
 
 ## 🚀 Quick start
 

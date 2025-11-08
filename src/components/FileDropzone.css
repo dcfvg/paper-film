@@ -4,7 +4,8 @@
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  background: radial-gradient(circle at 15% 25%, rgba(242, 197, 114, 0.25), transparent 45%),
+  background:
+    radial-gradient(circle at 15% 25%, rgba(242, 197, 114, 0.25), transparent 45%),
     radial-gradient(circle at 80% 0%, rgba(47, 157, 165, 0.3), transparent 50%),
     linear-gradient(135deg, #0f141e, #1f2a3d);
 }
@@ -91,6 +92,14 @@
   text-transform: uppercase;
 }
 
+.dropzone-description {
+  margin: 0.35rem 0 0 0;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.35;
+  max-width: 34rem;
+}
+
 .dropzone-callout {
   flex: 1 1 360px;
   background: rgba(255, 255, 255, 0.05);
@@ -168,11 +177,11 @@
   .dropzone-title {
     font-size: 2rem;
   }
-  
+
   .dropzone {
     padding: 2rem 1rem;
   }
-  
+
   .dropzone-info {
     grid-template-columns: 1fr;
     gap: 1rem;

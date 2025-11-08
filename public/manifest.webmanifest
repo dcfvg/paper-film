@@ -7,7 +7,7 @@
   "orientation": "any",
   "background_color": "#0f141e",
   "theme_color": "#0f141e",
-  "description": "Turn any video and its subtitles into a printable contact sheet. Create ciné-romans from your videos with subtitles.",
+  "description": "Turn any film or video and its subtitles into a polished, printable contact sheet — a visual storyboard of every line of dialogue.",
   "categories": ["productivity", "utilities", "photo"],
   "icons": [
     {

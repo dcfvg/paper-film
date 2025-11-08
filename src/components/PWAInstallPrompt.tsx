@@ -10,6 +10,7 @@ export default function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const logoSrc = `${import.meta.env.BASE_URL}paper-film-mark.svg`;
 
   useEffect(() => {
     // Check if already installed
@@ -75,7 +76,9 @@ export default function PWAInstallPrompt() {
   return (
     <div className="pwa-install-prompt">
       <div className="pwa-install-content">
-        <div className="pwa-install-icon">📱</div>
+        <div className="pwa-install-icon">
+          <img src={logoSrc} alt="Paper Film" />
+        </div>
         <div className="pwa-install-text">
           <h3>Install Paper Film</h3>
           <p>Install this app on your device for quick access and offline use</p>

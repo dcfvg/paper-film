@@ -76,7 +76,7 @@ export function ConfigPanel({
           <img src={logoSrc} className="app-logo" alt="Paper Film mark" />
           <div className="app-identity-text">
             <h2>Paper Film</h2>
-            <p className="app-tagline">Analog warmth for subtitle sheets</p>
+            <p className="app-tagline">Contact sheets from video + subtitles.</p>
           </div>
         </div>
         <div className="config-actions" />
@@ -87,7 +87,12 @@ export function ConfigPanel({
           <div className="stat-pill">
             <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
               <rect x="4" y="6" width="16" height="10" rx="2" stroke="currentColor" fill="none" />
-              <path d="M4 15l4-3 4 3 4-3 4 3" stroke="currentColor" fill="none" strokeLinecap="round" />
+              <path
+                d="M4 15l4-3 4 3 4-3 4 3"
+                stroke="currentColor"
+                fill="none"
+                strokeLinecap="round"
+              />
             </svg>
             <div>
               <span>Frames ready</span>
@@ -138,7 +143,14 @@ export function ConfigPanel({
                         fill="none"
                         stroke="currentColor"
                       />
-                      <line x1="3" y1="4" x2="21" y2="20" stroke="currentColor" strokeLinecap="round" />
+                      <line
+                        x1="3"
+                        y1="4"
+                        x2="21"
+                        y2="20"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                      />
                       <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" />
                     </>
                   )}
@@ -222,9 +234,7 @@ export function ConfigPanel({
                   : undefined
               }
             />
-            <span>
-              Fluid text {isSmoothForced && <em>(required)</em>}
-            </span>
+            <span>Fluid text {isSmoothForced && <em>(required)</em>}</span>
           </label>
         </div>
       </div>
