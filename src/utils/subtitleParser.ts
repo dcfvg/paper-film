@@ -210,7 +210,7 @@ function startsNewSentence(text: string): boolean {
   }
 
   const firstChar = trimmed[0];
-  if (/^[«“"(\[]/.test(firstChar)) {
+  if (/^[«""([]/.test(firstChar)) {
     return true;
   }
 
