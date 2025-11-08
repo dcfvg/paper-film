@@ -3,6 +3,8 @@ import FileDropzone from './components/FileDropzone';
 import { SplitView } from './components/SplitView';
 import { ConfigPanel } from './components/ConfigPanel';
 import { PreviewPanel } from './components/PreviewPanel';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
+import PWAUpdatePrompt from './components/PWAUpdatePrompt';
 import { parseSubtitleFile, selectSubtitles } from './utils/subtitleParser';
 import { useFrameCapture } from './hooks/useFrameCapture';
 import type { SubtitleEntry, PrintOptions } from './types';
@@ -158,6 +160,9 @@ function App() {
 
   return (
     <div className="app">
+      <PWAInstallPrompt />
+      <PWAUpdatePrompt />
+
       {state === 'upload' && (
         <FileDropzone
           onVideoSelect={handleVideoSelect}
@@ -209,6 +214,6 @@ function App() {
 }
 
 export default App;
-  const handlePrint = () => {
-    window.print();
-  };
+const handlePrint = () => {
+  window.print();
+};
