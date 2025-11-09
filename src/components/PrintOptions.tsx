@@ -12,24 +12,30 @@ interface PrintOptionsProps {
   isSmoothForced?: boolean;
 }
 
-export default function PrintOptionsComponent({ options, onChange, smoothPhrases, onSmoothPhrasesChange, isSmoothForced = false }: PrintOptionsProps) {
+export default function PrintOptionsComponent({
+  options,
+  onChange,
+  smoothPhrases,
+  onSmoothPhrasesChange,
+  isSmoothForced = false
+}: PrintOptionsProps) {
   const [availableFonts, setAvailableFonts] = useState(FONT_DATABASE);
 
   useEffect(() => {
     // Détecter les polices disponibles au montage du composant
     const detectFonts = async () => {
-      const fontNames = FONT_DATABASE.map(f => f.value);
+      const fontNames = FONT_DATABASE.map((f) => f.value);
       const available = await detectAvailableFonts(fontNames);
       const availableSet = new Set(available);
-      
+
       // Filtrer pour ne garder que les polices disponibles
       const filtered = FONT_DATABASE.filter(
-        font => font.alwaysAvailable || availableSet.has(font.value)
+        (font) => font.alwaysAvailable || availableSet.has(font.value)
       );
-      
+
       setAvailableFonts(filtered);
     };
-    
+
     detectFonts();
   }, []);
   const handleChange = <K extends keyof PrintOptions>(key: K, value: PrintOptions[K]) => {

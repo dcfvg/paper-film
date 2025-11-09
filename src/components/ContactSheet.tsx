@@ -24,8 +24,8 @@ interface ContactSheetProps {
   onPrintOptionsChange: (options: PrintOptions) => void;
 }
 
-export default function ContactSheet({ 
-  frames, 
+export default function ContactSheet({
+  frames,
   onBack,
   onGenerate,
   videoFileName,
@@ -39,8 +39,8 @@ export default function ContactSheet({
   onSmoothPhrasesChange,
   isProcessing,
   progress,
-  printOptions, 
-  onPrintOptionsChange 
+  printOptions,
+  onPrintOptionsChange
 }: ContactSheetProps) {
   // Force smooth phrases when there are more subtitles than frames
   const isSmoothForced = subtitles.length > 0 && captureCount < subtitles.length;
@@ -59,11 +59,11 @@ export default function ContactSheet({
   // Apply print options to CSS variables
   const gridStyle = {
     '--columns': printOptions.columns,
-    '--subtitle-font-size': `${printOptions.subtitleFontSize}pt`,
+    '--subtitle-font-size': `${printOptions.subtitleFontSize}pt`
   } as React.CSSProperties;
 
   return (
-    <div 
+    <div
       className={`contact-sheet-container 
         cols-${printOptions.columns} 
         ${printOptions.orientation} 
@@ -87,7 +87,7 @@ export default function ContactSheet({
             <div className="header-left">
               <div className="controls-section">
                 <h3 className="section-title">⚙️ Setup</h3>
-                
+
                 <div className="control-row">
                   <label htmlFor="frame-count" className="control-label">
                     Frames: <strong>{captureCount}</strong>
@@ -110,7 +110,11 @@ export default function ContactSheet({
 
                 <div className="control-row">
                   <label htmlFor="time-offset" className="control-label">
-                    Offset: <strong>{timeOffset > 0 ? '+' : ''}{timeOffset}ms</strong>
+                    Offset:{' '}
+                    <strong>
+                      {timeOffset > 0 ? '+' : ''}
+                      {timeOffset}ms
+                    </strong>
                   </label>
                   <input
                     id="time-offset"
@@ -159,8 +163,8 @@ export default function ContactSheet({
               </div>
 
               <div className="options-section">
-                <PrintOptionsComponent 
-                  options={printOptions} 
+                <PrintOptionsComponent
+                  options={printOptions}
                   onChange={onPrintOptionsChange}
                   smoothPhrases={smoothPhrases}
                   onSmoothPhrasesChange={onSmoothPhrasesChange}
@@ -168,19 +172,19 @@ export default function ContactSheet({
                 />
               </div>
             </div>
-            
+
             <div className="header-right">
-              <PrintOptionsComponent 
-                options={printOptions} 
+              <PrintOptionsComponent
+                options={printOptions}
                 onChange={onPrintOptionsChange}
                 smoothPhrases={smoothPhrases}
                 onSmoothPhrasesChange={onSmoothPhrasesChange}
                 isSmoothForced={isSmoothForced}
               />
             </div>
-            
+
             <div className="header-right">
-              <LayoutPreview 
+              <LayoutPreview
                 printOptions={printOptions}
                 totalFrames={frames.length > 0 ? frames.length : captureCount}
                 videoFile={videoFile}
@@ -198,52 +202,50 @@ export default function ContactSheet({
         <div className="contact-sheet-grid" style={gridStyle}>
           {frames.map((frame, index) => (
             <div key={index} className="frame-card">
-            <div className="frame-image-container">
-              {frame.isLoading ? (
+              <div className="frame-image-container">
+                {frame.isLoading ? (
                   <div className="frame-loading">
                     <div className="spinner"></div>
                     <p>Capturing frame…</p>
                   </div>
-              ) : frame.error ? (
-                <div className="frame-error">
-                  <p>❌ {frame.error}</p>
+                ) : frame.error ? (
+                  <div className="frame-error">
+                    <p>❌ {frame.error}</p>
+                  </div>
+                ) : frame.imageUrl ? (
+                  <img
+                    src={frame.imageUrl}
+                    alt={`Frame at ${formatTimestamp(frame.timestamp)}`}
+                    className="frame-image"
+                  />
+                ) : (
+                  <div className="frame-placeholder">
+                    <p>Waiting…</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="frame-info">
+                {printOptions.showTimecodes && (
+                  <div className="frame-timestamp">{formatTimestamp(frame.timestamp)}</div>
+                )}
+                <div
+                  className="frame-subtitle"
+                  style={{
+                    textAlign: printOptions.subtitleAlignment,
+                    fontFamily: printOptions.subtitleFontFamily
+                  }}
+                >
+                  {frame.subtitle}
                 </div>
-              ) : frame.imageUrl ? (
-                <img 
-                  src={frame.imageUrl} 
-                  alt={`Frame at ${formatTimestamp(frame.timestamp)}`}
-                  className="frame-image"
-                />
-              ) : (
-                <div className="frame-placeholder">
-                  <p>Waiting…</p>
-                </div>
-              )}
-            </div>
-            
-            <div className="frame-info">
-              {printOptions.showTimecodes && (
-                <div className="frame-timestamp">
-                  {formatTimestamp(frame.timestamp)}
-                </div>
-              )}
-              <div
-                className="frame-subtitle"
-                style={{
-                  textAlign: printOptions.subtitleAlignment,
-                  fontFamily: printOptions.subtitleFontFamily
-                }}
-              >
-                {frame.subtitle}
               </div>
             </div>
-          </div>
-        ))}
+          ))}
         </div>
 
         <div className="contact-sheet-footer">
           <p>
-            {frames.filter(f => f && !f.isLoading).length} / {frames.length} frames ready
+            {frames.filter((f) => f && !f.isLoading).length} / {frames.length} frames ready
           </p>
         </div>
       </div>

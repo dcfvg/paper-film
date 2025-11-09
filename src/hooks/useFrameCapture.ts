@@ -40,21 +40,21 @@ export function useFrameCapture(): UseFrameCaptureResult {
 
     setIsProcessing(true);
     setProgress(0);
-    
+
     // Initialiser la grille avec des placeholders
-    const initialFrames: CapturedFrame[] = subtitles.map(subtitle => ({
+    const initialFrames: CapturedFrame[] = subtitles.map((subtitle) => ({
       timestamp: getCaptureTimestamp(subtitle),
       imageUrl: null,
       subtitle: subtitle.text.trim(),
       isLoading: true
     }));
-    
+
     setFrames(initialFrames);
-    
+
     try {
       // Charger la vidéo
       const video = await loadVideo(videoFile);
-      
+
       // Capturer les frames séquentiellement pour garantir la bonne position
       for (let index = 0; index < subtitles.length; index++) {
         // Vérifier si le processus a été annulé
@@ -65,12 +65,12 @@ export function useFrameCapture(): UseFrameCaptureResult {
 
         const subtitle = subtitles[index];
         const captureTimestamp = getCaptureTimestamp(subtitle);
-        
+
         try {
           const imageUrl = await captureVideoFrame(video, captureTimestamp);
-          
+
           // Mettre à jour la frame individuellement
-          setFrames(prevFrames => {
+          setFrames((prevFrames) => {
             const newFrames = [...prevFrames];
             newFrames[index] = {
               ...newFrames[index],
@@ -79,13 +79,13 @@ export function useFrameCapture(): UseFrameCaptureResult {
             };
             return newFrames;
           });
-          
+
           // Mettre à jour la progression
           setProgress(((index + 1) / subtitles.length) * 100);
         } catch (error) {
           console.error(`Error capturing frame at ${captureTimestamp}:`, error);
-          
-          setFrames(prevFrames => {
+
+          setFrames((prevFrames) => {
             const newFrames = [...prevFrames];
             newFrames[index] = {
               ...newFrames[index],
@@ -94,16 +94,15 @@ export function useFrameCapture(): UseFrameCaptureResult {
             };
             return newFrames;
           });
-          
+
           // Continuer malgré l'erreur
           setProgress(((index + 1) / subtitles.length) * 100);
         }
       }
-      
+
       // Note: On ne révoque pas l'URL de la vidéo immédiatement
       // car les images capturées sont des data URLs indépendantes
       // Le navigateur nettoiera automatiquement les blobs non utilisés
-      
     } catch (error) {
       console.error('Error processing video:', error);
       if (!abortController.signal.aborted) {
@@ -123,7 +122,7 @@ export function useFrameCapture(): UseFrameCaptureResult {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
-    
+
     setFrames([]);
     setIsProcessing(false);
     setProgress(0);

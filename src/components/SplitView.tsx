@@ -9,9 +9,9 @@ interface SplitViewProps {
   minLeftWidth?: number; // Minimum pixel width for left panel (default 410px)
 }
 
-export function SplitView({ 
-  left, 
-  right, 
+export function SplitView({
+  left,
+  right,
   defaultSplit = 30,
   minSize = 20,
   minLeftWidth = 410
@@ -52,20 +52,20 @@ export function SplitView({
       const container = containerRef.current;
       const rect = container.getBoundingClientRect();
       const newLeftWidth = e.clientX - rect.left;
-      
+
       // Calculer le pourcentage, mais avec contrainte de largeur minimale en pixels
       const percentage = (newLeftWidth / rect.width) * 100;
-      
+
       // Contrainte de largeur minimale en pixels pour le panneau gauche
       const minLeftPercentage = (minLeftWidth / rect.width) * 100;
       const minRightPercentage = minSize;
-      
+
       // Constrain entre minLeftWidth (en pixels) et (100 - minSize)
       const constrained = Math.max(
         minLeftPercentage,
         Math.min(100 - minRightPercentage, percentage)
       );
-      
+
       setSplitPosition(constrained);
     };
 
@@ -93,28 +93,16 @@ export function SplitView({
   };
 
   return (
-    <div 
-      ref={containerRef}
-      className={`split-view ${isDragging ? 'dragging' : ''}`}
-    >
-      <div 
-        className="split-panel split-left"
-        style={{ width: `${splitPosition}%` }}
-      >
+    <div ref={containerRef} className={`split-view ${isDragging ? 'dragging' : ''}`}>
+      <div className="split-panel split-left" style={{ width: `${splitPosition}%` }}>
         {left}
       </div>
-      
-      <div 
-        className="split-divider"
-        onMouseDown={handleMouseDown}
-      >
+
+      <div className="split-divider" onMouseDown={handleMouseDown}>
         <div className="split-handle" />
       </div>
-      
-      <div 
-        className="split-panel split-right"
-        style={{ width: `${100 - splitPosition}%` }}
-      >
+
+      <div className="split-panel split-right" style={{ width: `${100 - splitPosition}%` }}>
         {right}
       </div>
     </div>

@@ -192,7 +192,10 @@
   padding: 0.4rem;
   color: var(--pf-muted);
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, transform 0.1s;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    transform 0.1s;
   display: flex;
   align-items: center;
   justify-content: center;

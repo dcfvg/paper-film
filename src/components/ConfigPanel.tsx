@@ -223,8 +223,8 @@ export function ConfigPanel({
 
       <div className="config-group">
         <h3>Print setup</h3>
-        <PrintOptions 
-          options={printOptions} 
+        <PrintOptions
+          options={printOptions}
           onChange={onPrintOptionsChange}
           smoothPhrases={smoothPhrases}
           onSmoothPhrasesChange={onSmoothPhrasesChange}

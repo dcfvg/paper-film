@@ -18,9 +18,9 @@ export default function FontPicker({ fonts, value, onChange }: FontPickerProps) 
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const selectedFont = fonts.find(f => f.value === value) || fonts[0];
+  const selectedFont = fonts.find((f) => f.value === value) || fonts[0];
 
-  const filteredFonts = fonts.filter(font =>
+  const filteredFonts = fonts.filter((font) =>
     font.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
