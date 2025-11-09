@@ -56,7 +56,11 @@ export function PreviewPanel({
               {frames.map((frame, frameIndex) => (
                 <div key={frameIndex} className="capture-item">
                   <div className="capture-image-wrapper">
-                    {frame.isLoading ? (
+                    {!frame ? (
+                      <div className="capture-placeholder">
+                        <span>Waiting…</span>
+                      </div>
+                    ) : frame.isLoading ? (
                       <div className="capture-loading">
                         <div className="spinner" />
                         <span>Capturing frame…</span>
@@ -79,7 +83,7 @@ export function PreviewPanel({
                   </div>
 
                   <div className="capture-subtitle">
-                    {printOptions.showTimecodes && (
+                    {printOptions.showTimecodes && frame && (
                       <div
                         className="capture-timecode"
                         style={{ fontSize: `${printOptions.subtitleFontSize * 0.7}pt` }}
@@ -94,7 +98,7 @@ export function PreviewPanel({
                         textAlign: printOptions.subtitleAlignment
                       }}
                     >
-                      {frame.subtitle}
+                      {frame?.subtitle || ''}
                     </div>
                   </div>
                 </div>
