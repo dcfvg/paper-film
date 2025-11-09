@@ -22,10 +22,16 @@ export default function PrintOptionsComponent({
   const [availableFonts, setAvailableFonts] = useState(FONT_DATABASE);
 
   useEffect(() => {
+    let isMounted = true;
+
     // Détecter les polices disponibles au montage du composant
     const detectFonts = async () => {
       const fontNames = FONT_DATABASE.map((f) => f.value);
       const available = await detectAvailableFonts(fontNames);
+
+      // Only update state if component is still mounted
+      if (!isMounted) return;
+
       const availableSet = new Set(available);
 
       // Filtrer pour ne garder que les polices disponibles
@@ -37,6 +43,10 @@ export default function PrintOptionsComponent({
     };
 
     detectFonts();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
   const handleChange = <K extends keyof PrintOptions>(key: K, value: PrintOptions[K]) => {
     onChange({ ...options, [key]: value });

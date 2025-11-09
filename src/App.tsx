@@ -63,7 +63,8 @@ function App() {
       columns: savedSettings.columns ?? 3,
       showTimecodes: savedSettings.showTimecodes ?? false,
       subtitleFontSize: savedSettings.subtitleFontSize ?? 8,
-      subtitleFontFamily: savedSettings.subtitleFontFamily ?? 'system-ui, -apple-system, sans-serif',
+      subtitleFontFamily:
+        savedSettings.subtitleFontFamily ?? 'system-ui, -apple-system, sans-serif',
       subtitleAlignment: savedSettings.subtitleAlignment ?? 'left'
     };
   });

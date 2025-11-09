@@ -24,18 +24,33 @@ export default function FontPicker({ fonts, value, onChange }: FontPickerProps) 
     font.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Fermer le dropdown quand on clique à l'extérieur
+  // Fermer le dropdown quand on clique à l'extérieur ou avec Escape
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event: PointerEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
         setSearchTerm('');
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+        setSearchTerm('');
+      }
+    };
+
+    // Use pointerdown instead of mousedown for better touch device support
+    document.addEventListener('pointerdown', handleClickOutside);
+    document.addEventListener('keydown', handleEscapeKey);
+
+    return () => {
+      document.removeEventListener('pointerdown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [isOpen]);
 
   const handleSelect = (font: Font) => {
     onChange(font.value);

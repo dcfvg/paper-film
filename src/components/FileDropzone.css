@@ -73,6 +73,7 @@
   width: 60px;
   height: 60px;
   color: var(--pf-amber);
+  margin-left: -4px;
 }
 
 .dropzone-title {

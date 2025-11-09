@@ -4,6 +4,8 @@ import './index.css';
 import App from './App.tsx';
 import { registerSW } from 'virtual:pwa-register';
 
+const PWA_REFRESH_EVENT = 'paper-film:pwa-refresh';
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
@@ -15,7 +17,7 @@ const updateSW = registerSW({
   onNeedRefresh() {
     console.log('[PWA] New content available, prompting for update');
     // Dispatch a custom event that the PWAUpdatePrompt component can listen to
-    window.dispatchEvent(new CustomEvent('pwa-update-available'));
+    window.dispatchEvent(new CustomEvent(PWA_REFRESH_EVENT));
   },
   onOfflineReady() {
     console.log('[PWA] App ready to work offline');
