@@ -95,6 +95,7 @@ export function PreviewPanel({
                       className="capture-text"
                       style={{
                         fontSize: `${printOptions.subtitleFontSize}pt`,
+                        fontFamily: printOptions.subtitleFontFamily,
                         textAlign: printOptions.subtitleAlignment
                       }}
                     >

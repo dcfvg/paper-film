@@ -63,6 +63,7 @@ function App() {
     showTimecodes: savedSettings.showTimecodes ?? false,
     showPagination: savedSettings.showPagination ?? false,
     subtitleFontSize: savedSettings.subtitleFontSize ?? 8,
+    subtitleFontFamily: savedSettings.subtitleFontFamily ?? 'system-ui, -apple-system, sans-serif',
     subtitleAlignment: savedSettings.subtitleAlignment ?? 'left',
     pageFormat: savedSettings.pageFormat ?? 'A4'
   });

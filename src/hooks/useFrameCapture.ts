@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import type { SubtitleEntry, CapturedFrame } from '../types';
 import { captureVideoFrame, loadVideo } from '../utils/videoCapture';
 
@@ -26,8 +26,18 @@ export function useFrameCapture(): UseFrameCaptureResult {
   const [frames, setFrames] = useState<CapturedFrame[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const captureFrames = useCallback(async (videoFile: File, subtitles: SubtitleEntry[]) => {
+    // Annuler le processus précédent s'il existe
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Créer un nouveau contrôleur d'annulation
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     setIsProcessing(true);
     setProgress(0);
     
@@ -47,6 +57,12 @@ export function useFrameCapture(): UseFrameCaptureResult {
       
       // Capturer les frames séquentiellement pour garantir la bonne position
       for (let index = 0; index < subtitles.length; index++) {
+        // Vérifier si le processus a été annulé
+        if (abortController.signal.aborted) {
+          console.log('[Capture] Process aborted');
+          return;
+        }
+
         const subtitle = subtitles[index];
         const captureTimestamp = getCaptureTimestamp(subtitle);
         
@@ -90,13 +106,24 @@ export function useFrameCapture(): UseFrameCaptureResult {
       
     } catch (error) {
       console.error('Error processing video:', error);
-      alert('Erreur lors du traitement de la vidéo');
+      if (!abortController.signal.aborted) {
+        alert('Erreur lors du traitement de la vidéo');
+      }
     } finally {
-      setIsProcessing(false);
+      if (!abortController.signal.aborted) {
+        setIsProcessing(false);
+        abortControllerRef.current = null;
+      }
     }
   }, []);
 
   const reset = useCallback(() => {
+    // Annuler le processus en cours
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    
     setFrames([]);
     setIsProcessing(false);
     setProgress(0);

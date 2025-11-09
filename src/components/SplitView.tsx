@@ -6,17 +6,44 @@ interface SplitViewProps {
   right: React.ReactNode;
   defaultSplit?: number; // Percentage for left panel (default 30%)
   minSize?: number; // Minimum percentage for each panel
+  minLeftWidth?: number; // Minimum pixel width for left panel (default 410px)
 }
 
 export function SplitView({ 
   left, 
   right, 
   defaultSplit = 30,
-  minSize = 20 
+  minSize = 20,
+  minLeftWidth = 410
 }: SplitViewProps) {
   const [splitPosition, setSplitPosition] = useState(defaultSplit);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Ajuster la position du split lors du redimensionnement de la fenêtre
+  useEffect(() => {
+    const handleResize = () => {
+      if (!containerRef.current) return;
+
+      const container = containerRef.current;
+      const rect = container.getBoundingClientRect();
+      const currentLeftWidth = (splitPosition / 100) * rect.width;
+
+      // Si la largeur actuelle est inférieure au minimum, ajuster
+      if (currentLeftWidth < minLeftWidth) {
+        const minLeftPercentage = (minLeftWidth / rect.width) * 100;
+        setSplitPosition(Math.min(minLeftPercentage, 100 - minSize));
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    // Vérifier aussi au montage
+    handleResize();
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [splitPosition, minLeftWidth, minSize]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -24,10 +51,21 @@ export function SplitView({
 
       const container = containerRef.current;
       const rect = container.getBoundingClientRect();
-      const percentage = ((e.clientX - rect.left) / rect.width) * 100;
-
-      // Constrain between minSize and (100 - minSize)
-      const constrained = Math.max(minSize, Math.min(100 - minSize, percentage));
+      const newLeftWidth = e.clientX - rect.left;
+      
+      // Calculer le pourcentage, mais avec contrainte de largeur minimale en pixels
+      const percentage = (newLeftWidth / rect.width) * 100;
+      
+      // Contrainte de largeur minimale en pixels pour le panneau gauche
+      const minLeftPercentage = (minLeftWidth / rect.width) * 100;
+      const minRightPercentage = minSize;
+      
+      // Constrain entre minLeftWidth (en pixels) et (100 - minSize)
+      const constrained = Math.max(
+        minLeftPercentage,
+        Math.min(100 - minRightPercentage, percentage)
+      );
+      
       setSplitPosition(constrained);
     };
 
@@ -48,7 +86,7 @@ export function SplitView({
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
     };
-  }, [isDragging, minSize]);
+  }, [isDragging, minSize, minLeftWidth]);
 
   const handleMouseDown = () => {
     setIsDragging(true);

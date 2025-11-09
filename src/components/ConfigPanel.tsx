@@ -219,29 +219,17 @@ export function ConfigPanel({
             <span>+30s (early)</span>
           </div>
         </div>
-
-        <div className="option-group checkbox-group">
-          <label className="checkbox-label">
-            <input
-              type="checkbox"
-              checked={smoothPhrases}
-              onChange={(e) => onSmoothPhrasesChange(e.target.checked)}
-              className="option-checkbox"
-              disabled={isSmoothForced}
-              title={
-                isSmoothForced
-                  ? 'Fluid text is required when there are fewer frames than subtitles'
-                  : undefined
-              }
-            />
-            <span>Fluid text {isSmoothForced && <em>(required)</em>}</span>
-          </label>
-        </div>
       </div>
 
       <div className="config-group">
         <h3>Print setup</h3>
-        <PrintOptions options={printOptions} onChange={onPrintOptionsChange} />
+        <PrintOptions 
+          options={printOptions} 
+          onChange={onPrintOptionsChange}
+          smoothPhrases={smoothPhrases}
+          onSmoothPhrasesChange={onSmoothPhrasesChange}
+          isSmoothForced={isSmoothForced}
+        />
       </div>
     </div>
   );

@@ -42,6 +42,9 @@ export default function ContactSheet({
   printOptions, 
   onPrintOptionsChange 
 }: ContactSheetProps) {
+  // Force smooth phrases when there are more subtitles than frames
+  const isSmoothForced = subtitles.length > 0 && captureCount < subtitles.length;
+
   const handlePrint = () => {
     window.print();
   };
@@ -158,7 +161,10 @@ export default function ContactSheet({
               <div className="options-section">
                 <PrintOptionsComponent 
                   options={printOptions} 
-                  onChange={onPrintOptionsChange} 
+                  onChange={onPrintOptionsChange}
+                  smoothPhrases={smoothPhrases}
+                  onSmoothPhrasesChange={onSmoothPhrasesChange}
+                  isSmoothForced={isSmoothForced}
                 />
               </div>
             </div>
@@ -166,7 +172,10 @@ export default function ContactSheet({
             <div className="header-right">
               <PrintOptionsComponent 
                 options={printOptions} 
-                onChange={onPrintOptionsChange} 
+                onChange={onPrintOptionsChange}
+                smoothPhrases={smoothPhrases}
+                onSmoothPhrasesChange={onSmoothPhrasesChange}
+                isSmoothForced={isSmoothForced}
               />
             </div>
             
@@ -220,7 +229,10 @@ export default function ContactSheet({
               )}
               <div
                 className="frame-subtitle"
-                style={{ textAlign: printOptions.subtitleAlignment }}
+                style={{
+                  textAlign: printOptions.subtitleAlignment,
+                  fontFamily: printOptions.subtitleFontFamily
+                }}
               >
                 {frame.subtitle}
               </div>
