@@ -231,7 +231,7 @@ export default function ContactSheet({
 
         <div className="contact-sheet-footer">
           <p>
-            {frames.filter(f => !f.isLoading).length} / {frames.length} frames ready
+            {frames.filter(f => f && !f.isLoading).length} / {frames.length} frames ready
           </p>
         </div>
       </div>

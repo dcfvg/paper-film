@@ -199,6 +199,38 @@
   grid-template-columns: repeat(4, 1fr);
 }
 
+.preview-grid.cols-5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.preview-grid.cols-6 {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+.preview-grid.cols-7 {
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.preview-grid.cols-8 {
+  grid-template-columns: repeat(8, 1fr);
+}
+
+.preview-grid.cols-9 {
+  grid-template-columns: repeat(9, 1fr);
+}
+
+.preview-grid.cols-10 {
+  grid-template-columns: repeat(10, 1fr);
+}
+
+.preview-grid.cols-11 {
+  grid-template-columns: repeat(11, 1fr);
+}
+
+.preview-grid.cols-12 {
+  grid-template-columns: repeat(12, 1fr);
+}
+
 .preview-frame {
   background: #f9fafb;
   border: 1px solid #e5e7eb;

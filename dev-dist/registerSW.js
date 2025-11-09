@@ -1,1 +1,0 @@
-if('serviceWorker' in navigator) navigator.serviceWorker.register('/paper-film/dev-sw.js?dev-sw', { scope: '/paper-film/', type: 'classic' })

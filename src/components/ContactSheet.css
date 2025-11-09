@@ -383,6 +383,38 @@
     grid-template-columns: repeat(4, 1fr);
   }
 
+  .cols-5 .contact-sheet-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .cols-6 .contact-sheet-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .cols-7 .contact-sheet-grid {
+    grid-template-columns: repeat(7, 1fr);
+  }
+
+  .cols-8 .contact-sheet-grid {
+    grid-template-columns: repeat(8, 1fr);
+  }
+
+  .cols-9 .contact-sheet-grid {
+    grid-template-columns: repeat(9, 1fr);
+  }
+
+  .cols-10 .contact-sheet-grid {
+    grid-template-columns: repeat(10, 1fr);
+  }
+
+  .cols-11 .contact-sheet-grid {
+    grid-template-columns: repeat(11, 1fr);
+  }
+
+  .cols-12 .contact-sheet-grid {
+    grid-template-columns: repeat(12, 1fr);
+  }
+
   .frame-card {
     box-shadow: none;
     border: none;

@@ -81,6 +81,38 @@
   grid-template-columns: repeat(4, 1fr);
 }
 
+.contact-sheet-grid.cols-5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.contact-sheet-grid.cols-6 {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+.contact-sheet-grid.cols-7 {
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.contact-sheet-grid.cols-8 {
+  grid-template-columns: repeat(8, 1fr);
+}
+
+.contact-sheet-grid.cols-9 {
+  grid-template-columns: repeat(9, 1fr);
+}
+
+.contact-sheet-grid.cols-10 {
+  grid-template-columns: repeat(10, 1fr);
+}
+
+.contact-sheet-grid.cols-11 {
+  grid-template-columns: repeat(11, 1fr);
+}
+
+.contact-sheet-grid.cols-12 {
+  grid-template-columns: repeat(12, 1fr);
+}
+
 .capture-item {
   display: flex;
   flex-direction: column;
@@ -93,7 +125,6 @@
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
-  background: rgba(15, 12, 32, 0.75);
   border-radius: 0;
   overflow: hidden;
   display: flex;

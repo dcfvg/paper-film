@@ -50,7 +50,7 @@ export function ConfigPanel({
   onPrintOptionsChange,
   onBack
 }: ConfigPanelProps) {
-  const readyFrames = frames.filter((frame) => !frame.isLoading).length;
+  const readyFrames = frames.filter((frame) => frame && !frame.isLoading).length;
   const logoSrc = `${import.meta.env.BASE_URL}paper-film-mark.svg`;
 
   const handleIdentityActivate = () => {
