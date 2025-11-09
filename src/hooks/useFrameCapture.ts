@@ -27,11 +27,18 @@ export function useFrameCapture(): UseFrameCaptureResult {
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const videoElementRef = useRef<HTMLVideoElement | null>(null);
 
   const captureFrames = useCallback(async (videoFile: File, subtitles: SubtitleEntry[]) => {
     // Annuler le processus précédent s'il existe
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
+    }
+
+    // Révoquer l'URL du blob vidéo précédent pour libérer la mémoire
+    if (videoElementRef.current?.src) {
+      URL.revokeObjectURL(videoElementRef.current.src);
+      videoElementRef.current = null;
     }
 
     // Créer un nouveau contrôleur d'annulation
@@ -54,6 +61,8 @@ export function useFrameCapture(): UseFrameCaptureResult {
     try {
       // Charger la vidéo
       const video = await loadVideo(videoFile);
+      // Garder une référence pour pouvoir révoquer l'URL plus tard
+      videoElementRef.current = video;
 
       // Capturer les frames séquentiellement pour garantir la bonne position
       for (let index = 0; index < subtitles.length; index++) {
@@ -69,8 +78,19 @@ export function useFrameCapture(): UseFrameCaptureResult {
         try {
           const imageUrl = await captureVideoFrame(video, captureTimestamp);
 
-          // Mettre à jour la frame individuellement
+          // Re-vérifier si le processus a été annulé après l'await
+          if (abortController.signal.aborted) {
+            console.log('[Capture] Process aborted after frame capture');
+            return;
+          }
+
+          // Mettre à jour la frame individuellement avec validation d'index
           setFrames((prevFrames) => {
+            // Vérifier que l'index est toujours valide (évite les crashes si le plan a changé)
+            if (index >= prevFrames.length) {
+              console.warn(`[Capture] Index ${index} out of bounds, skipping update`);
+              return prevFrames;
+            }
             const newFrames = [...prevFrames];
             newFrames[index] = {
               ...newFrames[index],
@@ -85,7 +105,18 @@ export function useFrameCapture(): UseFrameCaptureResult {
         } catch (error) {
           console.error(`Error capturing frame at ${captureTimestamp}:`, error);
 
+          // Re-vérifier si le processus a été annulé
+          if (abortController.signal.aborted) {
+            console.log('[Capture] Process aborted after error');
+            return;
+          }
+
           setFrames((prevFrames) => {
+            // Vérifier que l'index est toujours valide
+            if (index >= prevFrames.length) {
+              console.warn(`[Capture] Index ${index} out of bounds, skipping error update`);
+              return prevFrames;
+            }
             const newFrames = [...prevFrames];
             newFrames[index] = {
               ...newFrames[index],
@@ -100,11 +131,19 @@ export function useFrameCapture(): UseFrameCaptureResult {
         }
       }
 
-      // Note: On ne révoque pas l'URL de la vidéo immédiatement
+      // Note: On révoque maintenant l'URL du blob vidéo une fois toutes les captures terminées
       // car les images capturées sont des data URLs indépendantes
-      // Le navigateur nettoiera automatiquement les blobs non utilisés
+      if (videoElementRef.current?.src) {
+        URL.revokeObjectURL(videoElementRef.current.src);
+        videoElementRef.current = null;
+      }
     } catch (error) {
       console.error('Error processing video:', error);
+      // Nettoyer même en cas d'erreur
+      if (videoElementRef.current?.src) {
+        URL.revokeObjectURL(videoElementRef.current.src);
+        videoElementRef.current = null;
+      }
       if (!abortController.signal.aborted) {
         alert('Erreur lors du traitement de la vidéo');
       }
@@ -121,6 +160,12 @@ export function useFrameCapture(): UseFrameCaptureResult {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
+    }
+
+    // Révoquer l'URL du blob vidéo
+    if (videoElementRef.current?.src) {
+      URL.revokeObjectURL(videoElementRef.current.src);
+      videoElementRef.current = null;
     }
 
     setFrames([]);

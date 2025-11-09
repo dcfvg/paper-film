@@ -14,7 +14,8 @@ createRoot(document.getElementById('root')!).render(
 const updateSW = registerSW({
   onNeedRefresh() {
     console.log('[PWA] New content available, prompting for update');
-    // The PWAUpdatePrompt component will handle the UI
+    // Dispatch a custom event that the PWAUpdatePrompt component can listen to
+    window.dispatchEvent(new CustomEvent('pwa-update-available'));
   },
   onOfflineReady() {
     console.log('[PWA] App ready to work offline');

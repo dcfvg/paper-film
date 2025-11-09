@@ -56,16 +56,16 @@ function App() {
   const effectiveSmooth = isSmoothForced ? true : smoothPhrases;
 
   // Charger les réglages sauvegardés ou utiliser les valeurs par défaut
-  const savedSettings = loadSettings();
-  const [printOptions, setPrintOptions] = useState<PrintOptions>({
-    orientation: 'portrait',
-    columns: savedSettings.columns ?? 3,
-    showTimecodes: savedSettings.showTimecodes ?? false,
-    showPagination: savedSettings.showPagination ?? false,
-    subtitleFontSize: savedSettings.subtitleFontSize ?? 8,
-    subtitleFontFamily: savedSettings.subtitleFontFamily ?? 'system-ui, -apple-system, sans-serif',
-    subtitleAlignment: savedSettings.subtitleAlignment ?? 'left',
-    pageFormat: savedSettings.pageFormat ?? 'A4'
+  // Use lazy initialization to avoid reading localStorage on every render
+  const [printOptions, setPrintOptions] = useState<PrintOptions>(() => {
+    const savedSettings = loadSettings();
+    return {
+      columns: savedSettings.columns ?? 3,
+      showTimecodes: savedSettings.showTimecodes ?? false,
+      subtitleFontSize: savedSettings.subtitleFontSize ?? 8,
+      subtitleFontFamily: savedSettings.subtitleFontFamily ?? 'system-ui, -apple-system, sans-serif',
+      subtitleAlignment: savedSettings.subtitleAlignment ?? 'left'
+    };
   });
 
   // Sauvegarder les réglages quand ils changent
@@ -145,7 +145,13 @@ function App() {
     } catch (error) {
       console.error('Error parsing subtitles:', error);
       alert('Erreur lors de la lecture du fichier de sous-titres');
+      // Clear all subtitle-related state on parse error
       setSubtitleFile(null);
+      setSubtitles([]);
+      // Reset capture hook to clear any stale frames
+      reset();
+      // Ensure we stay in upload state
+      setState('upload');
     } finally {
       setIsParsingSubtitles(false);
     }

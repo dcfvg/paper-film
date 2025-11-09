@@ -24,14 +24,11 @@ export interface SubtitleFile {
 }
 
 export interface PrintOptions {
-  orientation: 'portrait' | 'landscape';
   columns: number;
   showTimecodes: boolean;
-  showPagination: boolean;
   subtitleFontSize: number; // en pt
   subtitleFontFamily: string; // police de caractère
   subtitleAlignment: 'left' | 'center' | 'right';
-  pageFormat: 'A3' | 'A4' | 'A5' | 'letter' | 'legal' | 'tabloid';
   captureCount?: number; // nombre de captures souhaité
   timeOffset?: number; // décalage en millisecondes
   smoothPhrases?: boolean; // fluidifier les phrases
