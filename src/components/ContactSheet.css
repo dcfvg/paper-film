@@ -264,7 +264,9 @@
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   break-inside: avoid;
   page-break-inside: avoid;
 }
@@ -304,7 +306,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #6b7280;
+  color: #000;
 }
 
 .spinner {
@@ -317,7 +319,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .frame-info {
@@ -433,7 +437,13 @@
     padding-top: 56.25%; /* Ratio 16:9 pour ne pas déformer */
     background: #000;
   }
-  
+
+  .frame-loading,
+  .frame-error,
+  .frame-placeholder {
+    color: white;
+  }
+
   .frame-image {
     object-fit: contain;
     background: #000;
